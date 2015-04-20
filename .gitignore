@@ -1,0 +1,13 @@
+/*
+!.gitignore
+!/module
+/module/*
+!/module/Payment
+!/public_html
+/public_html/*
+!/public_html/layout
+/public_html/layout/*
+!/public_html/layout/base
+/public_html/layout/base/*
+!/public_html/layout/base/payment
+!/release

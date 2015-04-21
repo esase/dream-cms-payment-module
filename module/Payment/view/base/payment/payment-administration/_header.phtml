@@ -5,7 +5,7 @@
 
 <div class="page-header">
   <h1>
-    <img src="<?php  echo $this->layoutAsset('icon/cart.png', 'image', 'payment') ?>" alt="<?php echo $this->escapeHtmlAttr($this->pageTitle) ?>" />    
+    <img src="<?php echo $this->layoutAsset('icon/cart.png', 'image', 'payment') ?>" alt="<?php echo $this->escapeHtmlAttr($this->pageTitle) ?>" />    
     <?php echo $this->escapeHtml($this->pageTitle) ?>
   </h1>
 </div>
@@ -13,30 +13,30 @@
 <?php $this->declareVars('baseTabs') ?>
 
 <?php
-    $this->baseTabs = array(
-        'list' => array(
+    $this->baseTabs = [
+        'list' => [
             'name' => $this->translate('List of transactions'),
             'controller' => 'payments-administration',
             'action' => 'list',
             'check_acl' => true
-        ),
-        'currencies' => array(
+        ],
+        'currencies' => [
             'name' => $this->translate('Currencies'),
             'controller' => 'payments-administration',
             'action' => 'currencies',
             'check_acl' => true
-        ),
-        'cupons' => array(
+        ],
+        'cupons' => [
             'name' => $this->translate('Discount coupons'),
             'controller' => 'payments-administration',
             'action' => 'coupons',
             'check_acl' => true
-        ),
-        'settings' => array(
+        ],
+        'settings' => [
             'name' => $this->translate('Settings'),
             'controller' => 'payments-administration',
             'action' => 'settings',
             'check_acl' => true
-        )
-    );
+        ]
+    ];
 ?>

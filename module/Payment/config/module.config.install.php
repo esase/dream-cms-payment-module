@@ -18,7 +18,7 @@ return [
     'module_depends' => [
     ],
     'clear_caches' => [
-        'setting'       => false,
+        'setting'       => true,
         'time_zone'     => false,
         'admin_menu'    => true,
         'js_cache'      => false,

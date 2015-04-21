@@ -1,0 +1,88 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Dream CMS \"payment\" module\n"
+"POT-Creation-Date: 2013-07-19 11:59+0600\n"
+"PO-Revision-Date: 2015-04-21 10:18+0600\n"
+"Last-Translator: AlexE <alexermashev@gmail.com>\n"
+"Language-Team: \n"
+"Language: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: translate\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Transactions"
+msgstr "Transactions"
+
+msgid "Paid"
+msgstr "Paid"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "List of transactions"
+msgstr "List of transactions"
+
+msgid "Currencies"
+msgstr "Currencies"
+
+msgid "Discount coupons"
+msgstr "Discount coupons"
+
+msgid "Payments"
+msgstr "Payments"
+
+msgid "Payment"
+msgstr "Payment"
+
+msgid "Module allows buy items on the site"
+msgstr "Module allows buy items on the site"
+
+msgid "ACL - Activating payments transactions in admin area"
+msgstr "Activating payments transactions in admin area"
+
+msgid "ACL - Deleting payments transactions in admin area"
+msgstr "Deleting payments transactions in admin area"
+
+msgid "ACL - Viewing payments transactions items in admin area"
+msgstr "Viewing payments transactions items in admin area"
+
+msgid "ACL - Viewing payments transactions details in admin area"
+msgstr "Viewing payments transactions details in admin area"
+
+msgid "ACL - Viewing payment transactions in admin area"
+msgstr "Viewing payment transactions in admin area"
+
+msgid "ACL - Viewing payment currencies in admin area"
+msgstr "Viewing payment currencies in admin area"
+
+msgid "ACL - Adding payment currencies in admin area"
+msgstr "Adding payment currencies in admin area"
+
+msgid "ACL - Editing payment currencies in admin area"
+msgstr "Editing payment currencies in admin area"
+
+msgid "ACL - Deleting payment currencies in admin area"
+msgstr "Deleting payment currencies in admin area"
+
+msgid "ACL - Editing exchange rates in admin area"
+msgstr "Editing exchange rates in admin area"
+
+msgid "ACL - Viewing discount coupons in admin area"
+msgstr "Viewing discount coupons in admin area"
+
+msgid "ACL - Deleting discount coupons in admin area"
+msgstr "Deleting discount coupons in admin area"
+
+msgid "ACL - Adding discount coupons in admin area"
+msgstr "Adding discount coupons in admin area"
+
+msgid "ACL - Editing discount coupons in admin area"
+msgstr "Editing discount coupons in admin area"
+
+msgid "ACL - Editing payments settings in admin area"
+msgstr "Editing payments settings in admin area"

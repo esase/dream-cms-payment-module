@@ -1,0 +1,172 @@
+<?php $this->declareVars('subPageTitle', 'parentPageTitle', 'content') ?>
+
+<?php $this->subPageTitle = $this->translate('View the transaction\'s items') ?>
+<?php $this->parentPageTitle = $this->translate('List of transactions') ?>
+
+<?php $this->headTitle($this->subPageTitle) ?>
+<?php $this->headTitle($this->transaction['slug']) ?>
+<?php $this->headTitle($this->parentPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('payment/payment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'list' // selected action is "list"
+]) ?>
+
+<!-- render a breadcrumb -->
+<?php echo $this->partial('administration-partial/breadcrumb', [
+    'pages' => [
+        'list' => [
+            'name' => $this->parentPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'list',
+            'check_acl' => true
+        ],
+        'view_items' => [
+            'name' => $this->transaction['slug'] . ' - ' . $this->subPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'view-transaction-items',
+            'check_acl' => true
+        ]
+    ]
+]) ?>
+
+<!-- render a data grid -->
+<?php $this->content = $this->partial('partial/data-grid', [
+    'controller' => 'payments-administration',
+    'action' => 'view-transaction-items',
+    'slug' => $this->transaction['id'],
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'title',
+    'default_order_type' => 'desc',
+    'headers' => [
+        [
+            'title' => $this->translate('Title'),
+            'order_name' => 'title'
+        ],
+        [
+            'title' => $this->translate('Unit Price'),
+            'order_name' => 'cost'
+        ],
+        [
+            'title' => $this->translate('Discount'),
+            'order_name' => 'discount'
+        ],
+        [
+            'title' => $this->translate('Count'),
+            'order_name' => 'count'
+        ],
+        [
+            'title' => $this->translate('Total price'),
+            'order_name' => 'total'
+        ],
+        [
+            'title' => $this->translate('Status')
+        ],
+    ],
+    'paginator' => $this->paginator,
+    'skipped_fields' => [
+        'view_controller',
+        'view_action',
+        'view_check',
+        'countable',
+        'slug',
+        'available',
+        'deleted',
+        'module_extra_options',
+        'handler',
+        'object_id',
+        'module_state'
+    ],
+    'helpers' => [
+        //'title' => 'paymentItemLink',
+        'cost' => 'paymentCostFormat',
+        'discount' => 'paymentCostFormat',
+        'total' => 'paymentCostFormat',
+        'active' => 'paymentItemStatus',
+        'module' => 'translate'
+    ],
+    'helpers_set_array' => [
+        'title' => true,
+        'extra_options' => true,
+        'active' => true
+    ],
+    'helpers_options' => [
+        'cost' => [
+            'currency' => $this->transaction['currency_code']  
+        ],
+        'discount' => [
+            'currency' => $this->transaction['currency_code']  
+        ],
+        'total' => [
+            'currency' => $this->transaction['currency_code']  
+        ],
+    ],
+    'actions' => [
+        'regular_actions' => [
+        ],
+        'multiple_actions' => [
+        ],
+        'single_actions' => [
+        ]
+    ],
+    'actions_options' => [
+        'action_identity' => '',
+        'form_name' => 'items',
+        'multiple_actions' => [
+            'items_name' => 'items[]'
+        ]
+    ],
+    'actions_extra_check' => [
+    ]
+]) ?>
+
+<?php $this->extraActions = trim($this->partial('administration-partial/extra-actions', ['pages' => [
+    [
+        'controller' => 'payments-administration',
+        'action' => 'delete-transactions',
+        'name' => $this->translate('Delete the transaction'),
+        'check_acl' => true,
+        'confirm' => $this->translate('Transaction will be deleted. Are you sure?'),
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'list'], ['force_canonical' => true])}'}) }"
+    ],
+    [
+        'controller' => 'payments-administration',
+        'action' => 'view-transaction-details',
+        'name' => $this->translate('View the transaction\'s details'),
+        'check_acl' => true,
+        'params' => [
+            'slug' => $this->transaction['id']
+        ]
+    ]]
+]))
+?>
+
+<!-- notification -->
+<?php echo $this->partial('partial/notification') ?>
+
+<div class="row">
+    <?php if ($this->extraActions): ?>
+        <div class="col-md-4">
+            <?php echo $this->extraActions ?>
+        </div>
+        <div class="col-md-8">
+            <?php echo $this->partial('administration-partial/panel', [
+                'title' => $this->translate('Transaction items'),
+                'body' => $this->content
+            ]) ?>
+        </div>
+    <?php else: ?>
+        <div class="col-md-12">
+            <?php echo $this->partial('administration-partial/panel', [
+                'title' => $this->translate('Transaction items'),
+                'body' => $this->content
+            ]) ?>
+        </div>
+    <?php endif ?>
+</div>

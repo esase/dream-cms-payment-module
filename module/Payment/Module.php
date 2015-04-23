@@ -63,7 +63,10 @@ class Module implements ConsoleUsageProviderInterface
     {
         return [
             'invokables' => [
-                'paymentCostFormat' => 'Payment\View\Helper\PaymentCostFormat'
+                'paymentCostFormat' => 'Payment\View\Helper\PaymentCostFormat',
+                'paymentItemStatus' => 'Payment\View\Helper\PaymentItemStatus'
+            ],
+            'factories' => [
             ]
         ];
     }

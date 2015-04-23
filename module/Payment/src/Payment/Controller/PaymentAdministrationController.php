@@ -36,6 +36,36 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     }
 
     /**
+     * View transaction's items
+     */
+    public function viewTransactionItemsAction()
+    {
+        // check the permission and increase permission's actions track
+        if (true !== ($result = $this->aclCheckPermission())) {
+            return $result;
+        }
+
+        // get the transaction info
+        if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($this->
+                getSlug(), false, 'id', false))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        // get data
+        $paginator = $this->getModel()->getTransactionItems($transactionInfo['id'],
+                $this->getPage(), $this->getPerPage(), $this->getOrderBy(), $this->getOrderType());
+
+        return new ViewModel([
+            'transaction' => $transactionInfo,
+            'paginator' => $paginator,
+            'order_by' => $this->getOrderBy(),
+            'order_type' => $this->getOrderType(),
+            'per_page' => $this->getPerPage()
+        ]);
+    }
+
+    /**
      * Transactions list 
      */
     public function listAction()
@@ -71,5 +101,81 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
             'order_type' => $this->getOrderType(),
             'per_page' => $this->getPerPage()
         ]);
+    }
+
+    /**
+     * View transaction's details
+     */
+    public function viewTransactionDetailsAction()
+    {
+        // check the permission and increase permission's actions track
+        if (true !== ($result = $this->aclCheckPermission())) {
+            return $result;
+        }
+
+        // get the transaction info
+        if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($this->
+                getSlug(), false, 'id', false))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        return new ViewModel([
+            'transaction' => $transactionInfo
+        ]);
+    }
+
+    /**
+     * Delete selected transactions
+     */
+    public function deleteTransactionsAction()
+    {
+        $request = $this->getRequest();
+
+        if ($request->isPost()) {
+            if (null !== ($transactionsIds = $request->getPost('transactions', null))) {
+                // delete selected transactions
+                $deleteResult = false;
+                $deletedCount = 0;
+
+                foreach ($transactionsIds as $transactionId) {
+                    // check the permission and increase permission's actions track
+                    if (true !== ($result = $this->aclCheckPermission(null, true, false))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Access Denied'));
+
+                        break;
+                    }
+
+                    // delete the transaction
+                    if (true !== ($deleteResult = $this->getModel()->deleteTransaction($transactionId))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage(($deleteResult ? $this->getTranslator()->translate($deleteResult)
+                                : $this->getTranslator()->translate('Error occurred')));
+
+                        break;
+                    }
+
+                    $deletedCount++;
+                }
+
+                if (true === $deleteResult) {
+                    $message = $deletedCount > 1
+                        ? 'Selected transactions have been deleted'
+                        : 'The selected transaction has been deleted';
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate($message));
+                }
+            }
+        }
+
+        // redirect back
+        return $request->isXmlHttpRequest()
+            ? $this->getResponse()
+            : $this->redirectTo('payments-administration', 'list', [], true);
     }
 }

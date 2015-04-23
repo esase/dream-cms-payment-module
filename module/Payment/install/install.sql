@@ -36,6 +36,11 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('payments_administration_delete_transactions', 'ACL - Deleting payments transactions in admin area', @moduleId),
 ('payments_administration_activate_transactions', 'ACL - Activating payments transactions in admin area', @moduleId);
 
+-- application events
+
+INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
+('delete_payment_transaction', @moduleId, 'Event - Deleting payment transactions');
+
 -- application settings
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
@@ -231,6 +236,24 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 
 -- module tables
 
+CREATE TABLE IF NOT EXISTS `payment_module` (
+    `module` SMALLINT(5) UNSIGNED NOT NULL,
+    `update_event` VARCHAR(50) NOT NULL,
+    `delete_event` VARCHAR(50) NOT NULL,
+    `view_controller` VARCHAR(50) NOT NULL,
+    `view_action` VARCHAR(50) NOT NULL,
+    `view_check` VARCHAR(255) NOT NULL,
+    `countable` TINYINT(1) NOT NULL,
+    `multi_costs` TINYINT(1) NOT NULL,
+    `extra_options` TINYINT(1) NOT NULL,
+    `must_login` TINYINT(1) UNSIGNED NOT NULL,
+    `handler` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (`module`),
+    FOREIGN KEY (`module`) REFERENCES `application_module`(`id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `payment_currency` (
     `id` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,
     `code` CHAR(3) NOT NULL,
@@ -310,4 +333,25 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     FOREIGN KEY (`discount_cupon`) REFERENCES `payment_discount_cupon`(`id`)
         ON UPDATE CASCADE
         ON DELETE SET NULL    
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
+    `transaction_id` INT(10) UNSIGNED NOT NULL,
+    `object_id` INT(10) UNSIGNED NOT NULL,
+    `module` SMALLINT(5) UNSIGNED NOT NULL,
+    `title` VARCHAR(100) NOT NULL,
+    `slug` VARCHAR(100) NOT NULL,
+    `cost` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+    `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+    `count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+    `deleted` TINYINT(1) NOT NULL DEFAULT 0,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `available` TINYINT(1) NOT NULL DEFAULT 1,
+    PRIMARY KEY (`object_id`, `module`, `transaction_id`),
+    FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

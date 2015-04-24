@@ -1,3 +1,5 @@
+<?php use Payment\Model\PaymentBase as PaymentBaseModel  ?>
+
 <?php $this->declareVars('subPageTitle', 'parentPageTitle', 'content') ?>
 
 <?php $this->subPageTitle = $this->translate('View the transaction\'s items') ?>
@@ -84,7 +86,6 @@
         'module_state'
     ],
     'helpers' => [
-        //'title' => 'paymentItemLink',
         'cost' => 'paymentCostFormat',
         'discount' => 'paymentCostFormat',
         'total' => 'paymentCostFormat',
@@ -129,6 +130,15 @@
 <?php $this->extraActions = trim($this->partial('administration-partial/extra-actions', ['pages' => [
     [
         'controller' => 'payments-administration',
+        'action' => 'activate-transactions',
+        'name' => $this->translate('Activate the transaction'),
+        'check_acl' => true,
+        'hide_action' => $this->transaction['paid'] == PaymentBaseModel::TRANSACTION_PAID,
+        'confirm' => $this->translate('Transaction will be activated. Are you sure?'),
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'view-transaction-details', 'slug' => $this->transaction['id']], ['force_canonical' => true])}'}) }"
+    ],
+    [
+        'controller' => 'payments-administration',
         'action' => 'delete-transactions',
         'name' => $this->translate('Delete the transaction'),
         'check_acl' => true,
@@ -158,14 +168,16 @@
         <div class="col-md-8">
             <?php echo $this->partial('administration-partial/panel', [
                 'title' => $this->translate('Transaction items'),
-                'body' => $this->content
+                'body' => $this->content,
+                'notification' => false
             ]) ?>
         </div>
     <?php else: ?>
         <div class="col-md-12">
             <?php echo $this->partial('administration-partial/panel', [
                 'title' => $this->translate('Transaction items'),
-                'body' => $this->content
+                'body' => $this->content,
+                'notification' => false
             ]) ?>
         </div>
     <?php endif ?>

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-04-23 11:22+0600\n"
+"PO-Revision-Date: 2015-04-24 10:27+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,12 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Transaction will be activated. Are you sure?"
+msgstr "Transaction will be activated. Are you sure?"
+
+msgid "Activate the transaction"
+msgstr "Activate the transaction"
 
 msgid "Transaction items"
 msgstr "Goods"
@@ -44,6 +50,9 @@ msgstr "Expiring membership level email notification"
 
 msgid "An expiring membership level message"
 msgstr "An expiring membership level message"
+
+msgid "The selected transaction has been activated"
+msgstr "The selected transaction has been activated"
 
 msgid "Selected transactions have been activated"
 msgstr "Selected transactions have been activated"

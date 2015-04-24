@@ -39,7 +39,8 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 -- application events
 
 INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
-('delete_payment_transaction', @moduleId, 'Event - Deleting payment transactions');
+('delete_payment_transaction', @moduleId, 'Event - Deleting payment transactions'),
+('activate_payment_transaction', @moduleId, 'Event - Activating payment transactions');
 
 -- application settings
 

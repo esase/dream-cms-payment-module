@@ -1,6 +1,7 @@
 <?php
 namespace Payment\Controller;
 
+use Payment\Model\PaymentBase as PaymentBaseModel;
 use Zend\View\Model\ViewModel;
 use Application\Controller\ApplicationAbstractAdministrationController;
 
@@ -177,5 +178,76 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
         return $request->isXmlHttpRequest()
             ? $this->getResponse()
             : $this->redirectTo('payments-administration', 'list', [], true);
+    }
+
+    /**
+     * Activate selected transactions
+     */
+    public function activateTransactionsAction()
+    {
+        $request = $this->getRequest();
+
+        if ($request->isPost()) {
+            if (null !== ($transactionsIds = $request->getPost('transactions', null))) {
+                // process transactions
+                $activationResult = true;
+                $activationCount  = 0;
+
+                foreach ($transactionsIds as $transactionId) {
+                    // get the transaction info
+                    if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($transactionId, false, 'id', false))
+                                || PaymentBaseModel::TRANSACTION_PAID == $transactionInfo['paid']) {
+
+                        $activationCount++;
+                        continue;
+                    }
+
+                    // check the permission and increase permission's actions track
+                    if (true !== ($result = $this->aclCheckPermission(null, true, false))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Access Denied'));
+
+                        break;
+                    }
+
+                    // activate the transaction
+                    if (true !== ($activationResult = $this->getModel()->activateTransaction($transactionInfo))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Transaction activation error'));
+
+                        break;
+                    }
+
+                    $activationCount++;
+                }
+
+                if (true === $activationResult) {
+                    $message = $activationCount > 1
+                        ? 'Selected transactions have been activated'
+                        : 'The selected transaction has been activated';
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate($message));
+                }
+            }
+        }
+
+        // redirect back
+        return $request->isXmlHttpRequest()
+            ? $this->getResponse()
+            : $this->redirectTo('payments-administration', 'list', [], true);
+    }
+
+    /**
+     * News settings
+     */
+    public function settingsAction()
+    {
+        return new ViewModel([
+            'settings_form' => parent::settingsForm('payment', 'payments-administration', 'settings')
+        ]);
     }
 }

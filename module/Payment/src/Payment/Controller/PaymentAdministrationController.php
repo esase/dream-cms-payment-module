@@ -242,12 +242,196 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     }
 
     /**
-     * News settings
+     * Payments settings
      */
     public function settingsAction()
     {
         return new ViewModel([
             'settings_form' => parent::settingsForm('payment', 'payments-administration', 'settings')
+        ]);
+    }
+
+    /**
+     * Currencies list 
+     */
+    public function currenciesAction()
+    {
+        // check the permission and increase permission's actions track
+        if (true !== ($result = $this->aclCheckPermission())) {
+            return $result;
+        }
+
+        // get data
+        $paginator = $this->getModel()->getCurrencies($this->
+                getPage(), $this->getPerPage(), $this->getOrderBy(), $this->getOrderType());
+
+        return new ViewModel([
+            'paginator' => $paginator,
+            'order_by' => $this->getOrderBy(),
+            'order_type' => $this->getOrderType(),
+            'per_page' => $this->getPerPage()
+        ]);
+    }
+
+    /**
+     * Add currency
+     */
+    public function addCurrencyAction()
+    {
+        $currencyForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentCurrency')
+            ->setModel($this->getModel());
+
+        $request = $this->getRequest();
+
+        // validate the form
+        if ($request->isPost()) {
+            // fill the form with received values
+            $currencyForm->getForm()->setData($request->getPost(), false);
+
+            // save data
+            if ($currencyForm->getForm()->isValid()) {
+                // check the permission and increase permission's actions track
+                if (true !== ($result = $this->aclCheckPermission())) {
+                    return $result;
+                }
+
+                // add a new currency
+                $result = $this->getModel()->addCurrency($currencyForm->getForm()->getData());
+
+                if (is_numeric($result)) {
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate('Currency has been added'));
+                }
+                else {
+                    $this->flashMessenger()
+                        ->setNamespace('error')
+                        ->addMessage($this->getTranslator()->translate($result));
+                }
+
+                return $this->redirectTo('payments-administration', 'add-currency');
+            }
+        }
+
+        return new ViewModel([
+            'currency_form' => $currencyForm->getForm()
+        ]);
+    }
+
+    /**
+     * Delete selected currencies
+     */
+    public function deleteCurrenciesAction()
+    {
+        $request = $this->getRequest();
+        
+        if ($request->isPost()) {
+            if (null !== ($currenciesIds = $request->getPost('currencies', null))) {
+                // delete selected currencies
+                $deleteResult = false;
+                $deletedCount = 0;
+
+                foreach ($currenciesIds as $currencyId) {
+                    // check the permission and increase permission's actions track
+                    if (true !== ($result = $this->aclCheckPermission(null, true, false))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Access Denied'));
+
+                        break;
+                    }
+
+                    // delete the currency
+                    if (true !== ($deleteResult = $this->getModel()->deleteCurrency($currencyId))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage(($deleteResult ? $this->getTranslator()->translate($deleteResult)
+                                : $this->getTranslator()->translate('Error occurred')));
+
+                        break;
+                    }
+
+                    $deletedCount++;
+                }
+
+                if (true === $deleteResult) {
+                    $message = $deletedCount > 1
+                        ? 'Selected currencies have been deleted'
+                        : 'The selected currency has been deleted';
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate($message));
+                }
+            }
+        }
+
+        // redirect back
+        return $request->isXmlHttpRequest()
+            ? $this->getResponse()
+            : $this->redirectTo('payments-administration', 'currencies', [], true);
+    }
+
+    /**
+     * Edit a currency action
+     */
+    public function editCurrencyAction()
+    {
+        // get the currency info
+        if (null == ($currency = $this->
+                getModel()->getCurrencyInfo($this->getSlug()))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        $currencyForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentCurrency')
+            ->setModel($this->getModel())
+            ->setCurrencyCodeId($currency['id'])
+            ->enabledPrimaryCurrency($this->getModel()->
+                    getCurrenciesCount() > 1 && $currency['primary_currency'] != PaymentBaseModel::PRIMARY_CURRENCY);
+
+        $currencyForm->getForm()->setData($currency);
+        $request = $this->getRequest();
+
+        // validate the form
+        if ($request->isPost()) {
+            // fill the form with received values
+            $currencyForm->getForm()->setData($request->getPost(), false);
+
+            // save data
+            if ($currencyForm->getForm()->isValid()) {
+                // check the permission and increase permission's actions track
+                if (true !== ($result = $this->aclCheckPermission())) {
+                    return $result;
+                }
+
+                // edit the currency
+                if (true == ($result = $this->
+                        getModel()->editCurrency($currency, $currencyForm->getForm()->getData()))) {
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate('Currency has been edited'));
+                }
+                else {
+                    $this->flashMessenger()
+                        ->setNamespace('error')
+                        ->addMessage($this->getTranslator()->translate($result));
+                }
+
+                return $this->redirectTo('payments-administration', 'edit-currency', [
+                    'slug' => $currency['id']
+                ]);
+            }
+        }
+
+        return new ViewModel([
+            'currency' => $currency,
+            'currency_form' => $currencyForm->getForm()
         ]);
     }
 }

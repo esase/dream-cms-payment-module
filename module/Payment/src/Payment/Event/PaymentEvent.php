@@ -20,6 +20,21 @@ class PaymentEvent extends ApplicationAbstractEvent
     const ACTIVATE_PAYMENT_TRANSACTION = 'activate_payment_transaction';
 
     /**
+     * Add payment currency event
+     */
+    const ADD_PAYMENT_CURRENCY = 'add_payment_currency';
+
+    /**
+     * Delete payment currency event
+     */
+    const DELETE_PAYMENT_CURRENCY = 'delete_payment_currency';
+
+    /**
+     * Edit payment currency event
+     */
+    const EDIT_PAYMENT_CURRENCY = 'edit_payment_currency';
+
+    /**
      * Fire activate payment transaction event
      *
      * @param integer $transactionId
@@ -101,5 +116,68 @@ class PaymentEvent extends ApplicationAbstractEvent
 
         self::fireEvent(self::DELETE_PAYMENT_TRANSACTION, 
                 $transactionId, self::getUserId(($type == 'system')), $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire add payment currency event
+     *
+     * @param integer $currencyId
+     * @return void
+     */
+    public static function fireAddPaymentCurrencyEvent($currencyId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Payment currency added by guest'
+            : 'Event - Payment currency added by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$currencyId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $currencyId];
+
+        self::fireEvent(self::ADD_PAYMENT_CURRENCY, 
+                $currencyId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire delete payment currency event
+     *
+     * @param integer $currencyId
+     * @return void
+     */
+    public static function fireDeletePaymentCurrencyEvent($currencyId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Payment currency deleted by guest'
+            : 'Event - Payment currency deleted by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$currencyId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $currencyId];
+
+        self::fireEvent(self::DELETE_PAYMENT_CURRENCY, 
+                $currencyId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire edit payment currency event
+     *
+     * @param integer $currencyId
+     * @return void
+     */
+    public static function fireEditPaymentCurrencyEvent($currencyId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Payment currency edited by guest'
+            : 'Event - Payment currency edited by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$currencyId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $currencyId];
+
+        self::fireEvent(self::EDIT_PAYMENT_CURRENCY, 
+                $currencyId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
     }
 }

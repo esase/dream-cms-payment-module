@@ -4,10 +4,10 @@
 <?php $this->headTitle($this->escapeHtml($this->pageTitle)) ?>
 
 <div class="page-header">
-  <h1>
-    <img src="<?php echo $this->layoutAsset('icon/cart.png', 'image', 'payment') ?>" alt="<?php echo $this->escapeHtmlAttr($this->pageTitle) ?>" />    
-    <?php echo $this->escapeHtml($this->pageTitle) ?>
-  </h1>
+    <h1>
+	<img src="<?php echo $this->layoutAsset('icon/cart.png', 'image', 'payment') ?>" alt="<?php echo $this->escapeHtmlAttr($this->pageTitle) ?>" />    
+	<?php echo $this->escapeHtml($this->pageTitle) ?>
+    </h1>
 </div>
 
 <?php $this->declareVars('baseTabs') ?>
@@ -21,7 +21,7 @@
             'check_acl' => true
         ],
         'currencies' => [
-            'name' => $this->translate('Currencies'),
+            'name' => $this->translate('List of currencies'),
             'controller' => 'payments-administration',
             'action' => 'currencies',
             'check_acl' => true

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-22 00:12+0600\n"
-"PO-Revision-Date: 2015-04-24 10:27+0600\n"
+"PO-Revision-Date: 2015-04-25 13:25+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -15,6 +15,27 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "You cannot delete the primary site currency"
+msgstr "Вы не можете удалять основную валюту сайта"
+
+msgid "Currency will be deleted. Are you sure?"
+msgstr "Валюта будет удалена. Вы уверены?"
+
+msgid "Delete the currency"
+msgstr "Удалить валюту"
+
+msgid "The selected currency has been deleted"
+msgstr "Выбранная валюта была удалена"
+
+msgid "The module allows you to shop on the site"
+msgstr "Модуль позволяет делать покупки на сайте"
+
+msgid "New currency"
+msgstr "Новая валюта"
+
+msgid "List of currencies"
+msgstr "Список валют"
 
 msgid "Transaction will be activated. Are you sure?"
 msgstr "Платежная операция будет активирована. Вы уверены?"

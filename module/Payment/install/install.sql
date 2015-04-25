@@ -40,7 +40,10 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 
 INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('delete_payment_transaction', @moduleId, 'Event - Deleting payment transactions'),
-('activate_payment_transaction', @moduleId, 'Event - Activating payment transactions');
+('activate_payment_transaction', @moduleId, 'Event - Activating payment transactions'),
+('add_payment_currency', @moduleId, 'Event - Adding payment currencies'),
+('delete_payment_currency', @moduleId, 'Event - Deleting payment currencies'),
+('edit_payment_currency', @moduleId, 'Event - Editing payment currencies');
 
 -- application settings
 
@@ -215,7 +218,7 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 (@settingId,  'Купить выбранные товары и услуги', 'ru');
 
 INSERT INTO `application_setting` (`name`, `label`, `description_helper`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('payment_rbk_eshop_id', 'Shop ID', '$serviceManager = Application\\Service\\Service::getServiceManager();\r\n$url = $serviceManager->get(''viewhelpermanager'')->get(''url'');\r\n$translate = $serviceManager->get(''viewhelpermanager'')->get(''translate'');\r\n\r\n$label  = $translate(''Set these links into your RBK Money account:'');\r\n$label .= ''<br />'';\r\n$label .= $translate(''Success URL'') . '': '' . $url(''administration'', array(''controller'' => ''payments'', ''action'' => ''success''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= $translate(''Fail URL'') . '': '' . $url(''administration'', array(''controller'' => ''payments'', ''action'' => ''error''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= $translate(''Callback URL'') . '': '' . $url(''administration'', array(''controller'' => ''payments'', ''action'' => ''process'', ''slug'' => ''rbk-money''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= ''<br />'';\r\n$label .= $translate(''Also set these options into your RBK Money account:'');\r\n$label .= ''<br />'';\r\n$label .= $translate(''HTTP method'') . '': POST'';\r\n$label .= ''<br />'';\r\n$label .= $translate(''Control signature'') . '': MD5'';\r\n\r\nreturn $label;', 'text', 1, 20, @settingCategoryId, @moduleId, 0, '', '', '');
+('payment_rbk_eshop_id', 'Shop ID', '$serviceLocator = Application\\Service\\ApplicationServiceLocator::getServiceLocator();\r\n$url = $serviceLocator->get(''viewhelpermanager'')->get(''url'');\r\n$translate = $serviceLocator->get(''viewhelpermanager'')->get(''translate'');\r\n\r\n$label  = $translate(''Set these links into your RBK Money account:'');\r\n$label .= ''<br />'';\r\n$label .= $translate(''Success URL'') . '': '' . $url(''application/page'', array(''controller'' => ''payments'', ''action'' => ''success''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= $translate(''Fail URL'') . '': '' . $url(''application/page'', array(''controller'' => ''payments'', ''action'' => ''error''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= $translate(''Callback URL'') . '': '' . $url(''application/page'', array(''controller'' => ''payments'', ''action'' => ''process'', ''slug'' => ''rbk-money''), array(''force_canonical'' => true));\r\n$label .= ''<br />'';\r\n$label .= ''<br />'';\r\n$label .= $translate(''Also set these options into your RBK Money account:'');\r\n$label .= ''<br />'';\r\n$label .= $translate(''HTTP method'') . '': POST'';\r\n$label .= ''<br />'';\r\n$label .= $translate(''Control signature'') . '': MD5'';\r\n\r\nreturn $label;', 'text', 1, 20, @settingCategoryId, @moduleId, 0, '', '', '');
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -269,6 +272,15 @@ INSERT INTO `payment_currency` (`id`, `code`, `name`, `primary_currency`) VALUES
 (1, 'RUR', 'Rubles', 1),
 (2, 'USD', 'Dollars USA', 0),
 (3, 'EUR', 'Euro', 0);
+
+CREATE TABLE IF NOT EXISTS `payment_exchange_rate` (
+    `rate` DECIMAL(10,2) UNSIGNED NOT NULL,
+    `currency` TINYINT(3) UNSIGNED NOT NULL,
+    PRIMARY KEY (`rate`, `currency`),
+    FOREIGN KEY (`currency`) REFERENCES `payment_currency`(`id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `payment_type` (
     `id` TINYINT(3) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -352,6 +364,29 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
+    FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `payment_shopping_cart` (
+    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `object_id` INT(10) UNSIGNED NOT NULL,
+    `module` SMALLINT(5) UNSIGNED NOT NULL,
+    `title` VARCHAR(100) NOT NULL,
+    `slug` VARCHAR(100) NOT NULL,
+    `cost` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+    `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+    `count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+    `shopping_cart_id` CHAR(32) NOT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `available` TINYINT(1) NOT NULL DEFAULT 1,
+    `date` INT(10) UNSIGNED NOT NULL,
+    `deleted` TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY (`object_id`, `module`, `shopping_cart_id`),
+    KEY `available` (`active`,`available`,`deleted`,`shopping_cart_id`),
+    KEY `date` (`date`),
     FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
         ON UPDATE CASCADE
         ON DELETE CASCADE

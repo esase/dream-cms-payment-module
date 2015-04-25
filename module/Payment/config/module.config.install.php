@@ -5,7 +5,7 @@ return [
     'version' => '1.0.0',
     'vendor' => 'eSASe',
     'vendor_email' => 'alexermashev@gmail.com',
-    'description' => 'Module allows buy items on the site',
+    'description' => 'The module allows you to shop on the site',
     'system_requirements' => [
         'php_extensions' => [
         ],

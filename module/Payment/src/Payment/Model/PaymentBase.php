@@ -1,6 +1,7 @@
 <?php
 namespace Payment\Model;
 
+use Application\Utility\ApplicationCache as CacheUtility;
 use Payment\Event\PaymentEvent;
 use Application\Utility\ApplicationErrorLogger;
 use Application\Service\ApplicationSetting as SettingService;
@@ -9,6 +10,7 @@ use Zend\Paginator\Paginator;
 use Zend\Paginator\Adapter\DbSelect as DbSelectPaginator;
 use Application\Model\ApplicationAbstractBase;
 use Zend\Db\Sql\Expression;
+use Zend\Db\Sql\Predicate\NotIn as NotInPredicate;
 use Zend\Db\ResultSet\ResultSet;
 use Exception;
 
@@ -68,6 +70,11 @@ class PaymentBase extends ApplicationAbstractBase
      * Item is not available flag
      */ 
     const ITEM_NOT_AVAILABLE = 0;
+
+    /**
+     * Payment exchange rates cache
+     */
+    const CACHE_EXCHANGE_RATES = 'Payment_Exchange_Rates';
 
     /**
      * Activate transaction
@@ -407,6 +414,82 @@ class PaymentBase extends ApplicationAbstractBase
         if ($userId) {
             $select->where([
                 'user_id' => $userId
+            ]);
+        }
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        return $result->current();
+    }
+
+    /**
+     * Is the currency code free
+     *
+     * @param string $code
+     * @param integer $currencyCodeId
+     * @return boolean
+     */
+    public function isCurrencyCodeFree($code, $currencyCodeId = 0)
+    {
+        $select = $this->select();
+        $select->from('payment_currency')
+            ->columns([
+                'id'
+            ])
+            ->where(['code' => $code]);
+
+        if ($currencyCodeId) {
+            $select->where([
+                new NotInPredicate('id', [$currencyCodeId])
+            ]);
+        }
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        return $resultSet->current() ? false : true;
+    }
+
+    /**
+     * Remove the exchange rates cache
+     *
+     * @return void
+     */
+    protected function removeExchangeRatesCache()
+    {
+        $cacheName = CacheUtility::getCacheName(self::CACHE_EXCHANGE_RATES, [true]);
+        $this->staticCacheInstance->removeItem($cacheName);
+
+        $cacheName = CacheUtility::getCacheName(self::CACHE_EXCHANGE_RATES, [false]);
+        $this->staticCacheInstance->removeItem($cacheName);
+    }
+
+    /**
+     * Get the currency info
+     *
+     * @param integer $id
+     * @param boolean $primary
+     * @return array
+     */
+    public function getCurrencyInfo($id, $primary = false)
+    {
+        $select = $this->select();
+        $select->from('payment_currency')
+            ->columns([
+                'id',
+                'code',
+                'name',
+                'primary_currency'
+            ])
+            ->where([
+                'id' => $id
+            ]);
+
+        if ($primary) {
+            $select->where([
+                new InPredicate('primary_currency ', [self::PRIMARY_CURRENCY])
             ]);
         }
 

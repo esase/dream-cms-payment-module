@@ -13,8 +13,8 @@ SET @menuPartId = (SELECT `id` from `application_admin_menu_part` where `name` =
 
 INSERT INTO `application_admin_menu` (`name`, `controller`, `action`, `module`, `order`, `category`, `part`) VALUES
 ('List of transactions', 'payments-administration', 'list', @moduleId, @maxOrder, @menuCategoryId, @menuPartId),
-('Currencies', 'payments-administration', 'currencies', @moduleId, @maxOrder + 1, @menuCategoryId, @menuPartId),
-('Discount coupons', 'payments-administration', 'coupons', @moduleId, @maxOrder + 2, @menuCategoryId, @menuPartId),
+('List of currencies', 'payments-administration', 'currencies', @moduleId, @maxOrder + 1, @menuCategoryId, @menuPartId),
+('List of discount coupons', 'payments-administration', 'coupons', @moduleId, @maxOrder + 2, @menuCategoryId, @menuPartId),
 ('Settings', 'payments-administration', 'settings', @moduleId, @maxOrder + 3, @menuCategoryId, @menuPartId);
 
 -- acl resources
@@ -43,7 +43,10 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('activate_payment_transaction', @moduleId, 'Event - Activating payment transactions'),
 ('add_payment_currency', @moduleId, 'Event - Adding payment currencies'),
 ('delete_payment_currency', @moduleId, 'Event - Deleting payment currencies'),
-('edit_payment_currency', @moduleId, 'Event - Editing payment currencies');
+('edit_payment_currency', @moduleId, 'Event - Editing payment currencies'),
+('delete_discount_coupon', @moduleId, 'Event - Deleting discount coupons'),
+('add_discount_coupon', @moduleId, 'Event - Adding discount coupons'),
+('edit_discount_coupon', @moduleId, 'Event - Editing discount coupons');
 
 -- application settings
 
@@ -298,11 +301,11 @@ INSERT INTO `payment_type` (`id`, `name`, `description`, `enable_option`, `handl
 
 CREATE TABLE IF NOT EXISTS `payment_discount_cupon` (
     `id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `slug` VARCHAR(50) NOT NULL DEFAULT '',
+    `slug` VARCHAR(50) DEFAULT NULL,
     `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
     `used` TINYINT(1) NOT NULL,
-    `date_start` INT(10) UNSIGNED NOT NULL,
-    `date_end` INT(10) UNSIGNED NOT NULL,
+    `date_start` INT(10) UNSIGNED DEFAULT NULL,
+    `date_end` INT(10) UNSIGNED DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `slug` (`slug`),
     KEY `discount` (`discount`),

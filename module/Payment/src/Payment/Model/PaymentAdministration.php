@@ -361,4 +361,240 @@ class PaymentAdministration extends PaymentBase
         PaymentEvent::fireEditPaymentCurrencyEvent($oldCurrencyInfo['id']);
         return true;
     }
+
+    /**
+     * Get coupons
+     *
+     * @param integer $page
+     * @param integer $perPage
+     * @param string $orderBy
+     * @param string $orderType
+     * @param array $filters
+     *      string slug
+     *      integer discount
+     *      integer used
+     *      integer start
+     *      integer end
+     * @return Paginator
+     */
+    public function getCoupons($page = 1, $perPage = 0, $orderBy = null, $orderType = null, array $filters = [])
+    {
+        $orderFields = [
+            'id',
+            'slug',
+            'discount',
+            'used',
+            'start',
+            'end'
+        ];
+
+        $orderType = !$orderType || $orderType == 'desc'
+            ? 'desc'
+            : 'asc';
+
+        $orderBy = $orderBy && in_array($orderBy, $orderFields)
+            ? $orderBy
+            : 'id';
+
+        $select = $this->select();
+        $select->from('payment_discount_cupon')
+            ->columns([
+                'id',
+                'slug',
+                'discount',
+                'used',
+                'start' => 'date_start',
+                'end' => 'date_end'
+            ])
+            ->order($orderBy . ' ' . $orderType);
+
+        // filter by a slug
+        if (!empty($filters['slug'])) {
+            $select->where([
+                'slug' => $filters['slug']
+            ]);
+        }
+
+        // filter by a discount
+        if (!empty($filters['discount'])) {
+            $select->where([
+                'discount' => $filters['discount']
+            ]);
+        }
+
+        // filter by a status
+        if (isset($filters['used']) && $filters['used'] != null) {
+            $select->where([
+                'used' => ((int) $filters['used'] == self::COUPON_USED ? $filters['used'] : self::COUPON_NOT_USED)
+            ]);
+        }
+
+        // filter by an activation date
+        if (!empty($filters['start'])) {
+            $select->where([
+                'date_start' => $filters['start']
+            ]);
+        }
+
+        // filter by a deactivation date
+        if (!empty($filters['end'])) {
+            $select->where([
+                'date_end' => $filters['end']
+            ]);
+        }
+
+        $paginator = new Paginator(new DbSelectPaginator($select, $this->adapter));
+        $paginator->setCurrentPageNumber($page);
+        $paginator->setItemCountPerPage(PaginationUtility::processPerPage($perPage));
+        $paginator->setPageRange(SettingService::getSetting('application_page_range'));
+
+        return $paginator;
+    }
+
+    /**
+     * Delete coupon
+     *
+     * @param integer $couponId
+     * @return boolean|string
+     */
+    public function deleteCoupon($couponId)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            $delete = $this->delete()
+                ->from('payment_discount_cupon')
+                ->where([
+                    'id' => $couponId
+                ]);
+
+            $statement = $this->prepareStatementForSqlObject($delete);
+            $result = $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        if ($result->count()) {
+            // fire the  delete discount coupon event
+            PaymentEvent::fireDeleteDiscountCouponEvent($couponId);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Add new coupon
+     *
+     * @param array $couponInfo
+     *      integer discount
+     *      integer date_start
+     *      integer date_end
+     * @return integer|string
+     */
+    public function addCoupon(array $couponInfo)
+    {
+        $insertId = 0;
+
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            if (!$couponInfo['date_start']) {
+                $couponInfo['date_start'] = null;
+            }
+
+            if (!$couponInfo['date_end']) {
+                $couponInfo['date_end'] = null;
+            }
+
+            $insert = $this->insert()
+                ->into('payment_discount_cupon')
+                ->values(array_merge($couponInfo, [
+                    'used' => self::COUPON_NOT_USED
+                ]));
+
+            $statement = $this->prepareStatementForSqlObject($insert);
+            $result = $statement->execute();
+            $insertId = $this->adapter->getDriver()->getLastGeneratedValue();
+
+            // generate a random slug
+            $update = $this->update()
+                ->table('payment_discount_cupon')
+                ->set([
+                    'slug' => strtoupper($this->generateSlug($insertId, $this->
+                            generateRandString(self::COUPON_MIN_SLUG_LENGTH, self::ALLOWED_SLUG_CHARS), 'payment_discount_cupon', 'id'))
+                ])
+                ->where([
+                    'id' => $insertId
+                ]);
+
+            $statement = $this->prepareStatementForSqlObject($update);
+            $result = $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        // fire the add discount coupon event
+        PaymentEvent::fireAddDiscountCouponEvent($insertId);
+        return $insertId;
+    }
+
+    /**
+     * Edit the coupon
+     *
+     * @param integer $id
+     * @param array $couponInfo
+     *      integer discount
+     *      integer date_start
+     *      integer date_end
+     * @return boolean|string
+     */
+    public function editCoupon($id, array $couponInfo)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            if (!$couponInfo['date_start']) {
+                $couponInfo['date_start'] = null;
+            }
+
+            if (!$couponInfo['date_end']) {
+                $couponInfo['date_end'] = null;
+            }
+
+            $update = $this->update()
+                ->table('payment_discount_cupon')
+                ->set($couponInfo)
+                ->where([
+                    'id' => $id
+                ]);
+
+            $statement = $this->prepareStatementForSqlObject($update);
+            $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        // fire the edit discount coupon event
+        PaymentEvent::fireEditDiscountCouponEvent($id);
+        return true;
+    }
 }

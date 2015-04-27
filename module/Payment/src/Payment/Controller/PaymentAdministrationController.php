@@ -434,4 +434,203 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
             'currency_form' => $currencyForm->getForm()
         ]);
     }
+
+    /**
+     * Coupons list 
+     */
+    public function couponsAction()
+    {
+        // check the permission and increase permission's actions track
+        if (true !== ($result = $this->aclCheckPermission())) {
+            return $result;
+        }
+
+        $filters = [];
+
+        // get a filter form
+        $filterForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentCouponFilter');
+
+        $request = $this->getRequest();
+        $filterForm->getForm()->setData($request->getQuery(), false);
+
+        // check the filter form validation
+        if ($filterForm->getForm()->isValid()) {
+            $filters = $filterForm->getForm()->getData();
+        }
+
+        // get data
+        $paginator = $this->getModel()->getCoupons($this->
+                getPage(), $this->getPerPage(), $this->getOrderBy(), $this->getOrderType(), $filters);
+
+        return new ViewModel([
+            'filter_form' => $filterForm->getForm(),
+            'paginator' => $paginator,
+            'order_by' => $this->getOrderBy(),
+            'order_type' => $this->getOrderType(),
+            'per_page' => $this->getPerPage()
+        ]);
+    }
+
+    /**
+     * Delete selected coupons
+     */
+    public function deleteCouponsAction()
+    {
+        $request = $this->getRequest();
+
+        if ($request->isPost()) {
+            if (null !== ($couponsIds = $request->getPost('coupons', null))) {
+                // delete selected coupons
+                $deleteResult = false;
+                $deletedCount = 0;
+
+                foreach ($couponsIds as $couponId) {
+                    // check the permission and increase permission's actions track
+                    if (true !== ($result = $this->aclCheckPermission(null, true, false))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Access Denied'));
+
+                        break;
+                    }
+
+                    // delete the coupon
+                    if (true !== ($deleteResult = $this->getModel()->deleteCoupon($couponId))) {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage(($deleteResult ? $this->getTranslator()->translate($deleteResult)
+                                : $this->getTranslator()->translate('Error occurred')));
+
+                        break;
+                    }
+
+                    $deletedCount++;
+                }
+
+                if (true === $deleteResult) {
+                    $message = $deletedCount > 1
+                        ? 'Selected coupons have been deleted'
+                        : 'The selected coupon has been deleted';
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate($message));
+                }
+            }
+        }
+
+        // redirect back
+        return $request->isXmlHttpRequest()
+            ? $this->getResponse()
+            : $this->redirectTo('payments-administration', 'coupons', [], true);
+    }
+
+    /**
+     * Add a coupon
+     */
+    public function addCouponAction()
+    {
+        // get a form instance
+        $couponForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentCoupon');
+
+        $request = $this->getRequest();
+
+        // validate the form
+        if ($request->isPost()) {
+            // fill the form with received values
+            $couponForm->getForm()->setData($request->getPost(), false);
+
+            // save data
+            if ($couponForm->getForm()->isValid()) {
+                // check the permission and increase permission's actions track
+                if (true !== ($result = $this->aclCheckPermission())) {
+                    return $result;
+                }
+
+                // add a new coupon
+                $result = $this->getModel()->addCoupon($couponForm->getForm()->getData());
+
+                if (is_numeric($result)) {
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate('Coupon has been added'));
+                }
+                else {
+                    $this->flashMessenger()
+                        ->setNamespace('error')
+                        ->addMessage($this->getTranslator()->translate($result));
+                }
+
+                return $this->redirectTo('payments-administration', 'add-coupon');
+            }
+        }
+
+        return new ViewModel([
+            'coupon_form' => $couponForm->getForm()
+        ]);
+    }
+
+    /**
+     * Edit a coupon action
+     */
+    public function editCouponAction()
+    {
+        // get the coupon info
+        if (null == ($coupon = $this->
+                getModel()->getCouponInfo($this->getSlug()))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        // get a form instance
+        $couponForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentCoupon')
+            ->setDiscount($coupon['discount'])
+            ->setDateStart($coupon['date_start'])
+            ->setDateEnd($coupon['date_end']);
+
+        $request = $this->getRequest();
+
+        // validate the form
+        if ($request->isPost()) {
+            // fill the form with received values
+            $couponForm->getForm()->setData($request->getPost(), false);
+
+            // save data
+            if ($couponForm->getForm()->isValid()) {
+                // check the permission and increase permission's actions track
+                if (true !== ($result = $this->aclCheckPermission())) {
+                    return $result;
+                }
+
+                // edit the coupon
+                if (true == ($result = $this->
+                        getModel()->editCoupon($coupon['id'], $couponForm->getForm()->getData()))) {
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate('Coupon has been edited'));
+                }
+                else {
+                    $this->flashMessenger()
+                        ->setNamespace('error')
+                        ->addMessage($this->getTranslator()->translate($result));
+                }
+
+                return $this->redirectTo('payments-administration', 'edit-coupon', [
+                    'slug' => $coupon['id']
+                ]);
+            }
+        }
+
+        return new ViewModel([
+            'coupon' => $coupon,
+            'coupon_form' => $couponForm->getForm()
+        ]);
+    }
 }

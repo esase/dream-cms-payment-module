@@ -35,6 +35,84 @@ class PaymentEvent extends ApplicationAbstractEvent
     const EDIT_PAYMENT_CURRENCY = 'edit_payment_currency';
 
     /**
+     * Delete discount coupon event
+     */
+    const DELETE_DISCOUNT_COUPON = 'delete_discount_coupon';
+
+    /**
+     * Add discount coupon event
+     */
+    const ADD_DISCOUNT_COUPON = 'add_discount_coupon';
+
+    /**
+     * Edit discount coupon event
+     */
+    const EDIT_DISCOUNT_COUPON = 'edit_discount_coupon';
+
+    /**
+     * Fire edit discount coupon event
+     *
+     * @param integer $couponId
+     * @return void
+     */
+    public static function fireEditDiscountCouponEvent($couponId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Discount coupon edited by guest'
+            : 'Event - Discount coupon edited by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$couponId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $couponId];
+
+        self::fireEvent(self::EDIT_DISCOUNT_COUPON, 
+                $couponId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire add discount coupon event
+     *
+     * @param integer $couponId
+     * @return void
+     */
+    public static function fireAddDiscountCouponEvent($couponId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Discount coupon added by guest'
+            : 'Event - Discount coupon added by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$couponId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $couponId];
+
+        self::fireEvent(self::ADD_DISCOUNT_COUPON, 
+                $couponId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire delete discount coupon event
+     *
+     * @param integer $couponId
+     * @return void
+     */
+    public static function fireDeleteDiscountCouponEvent($couponId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Discount coupon deleted by guest'
+            : 'Event - Discount coupon deleted by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$couponId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $couponId];
+
+        self::fireEvent(self::DELETE_DISCOUNT_COUPON, 
+                $couponId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire activate payment transaction event
      *
      * @param integer $transactionId

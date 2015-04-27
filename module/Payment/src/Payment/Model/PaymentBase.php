@@ -77,6 +77,26 @@ class PaymentBase extends ApplicationAbstractBase
     const CACHE_EXCHANGE_RATES = 'Payment_Exchange_Rates';
 
     /**
+     * Coupon used
+     */
+    const COUPON_USED = 1;
+
+    /**
+     * Coupon not used
+     */
+    const COUPON_NOT_USED = 0;
+
+    /**
+     * Coupon min slug length
+     */
+    const COUPON_MIN_SLUG_LENGTH = 15;
+
+    /**
+     * Allowed slug chars
+     */
+    const ALLOWED_SLUG_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
      * Activate transaction
      *
      * @param array $transactionInfo
@@ -492,6 +512,35 @@ class PaymentBase extends ApplicationAbstractBase
                 new InPredicate('primary_currency ', [self::PRIMARY_CURRENCY])
             ]);
         }
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        return $result->current();
+    }
+
+    /**
+     * Get the coupon info
+     *
+     * @param integer|sting $id
+     * @param string $field
+     * @return array
+     */
+    public function getCouponInfo($id, $field = 'id')
+    {
+        $select = $this->select();
+        $select->from('payment_discount_cupon')
+            ->columns([
+                'id',
+                'slug',
+                'discount',
+                'used',
+                'date_start',
+                'date_end'
+            ])
+            ->where([
+                ($field == 'id' ? $field : 'slug') => $id
+            ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
         $result = $statement->execute();

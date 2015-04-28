@@ -46,7 +46,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('edit_payment_currency', @moduleId, 'Event - Editing payment currencies'),
 ('delete_discount_coupon', @moduleId, 'Event - Deleting discount coupons'),
 ('add_discount_coupon', @moduleId, 'Event - Adding discount coupons'),
-('edit_discount_coupon', @moduleId, 'Event - Editing discount coupons');
+('edit_discount_coupon', @moduleId, 'Event - Editing discount coupons'),
+('edit_exchange_rates', @moduleId, 'Event - Editing exchange rates');
 
 -- application settings
 

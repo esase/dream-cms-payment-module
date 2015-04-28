@@ -11,6 +11,7 @@ use Zend\Paginator\Adapter\DbSelect as DbSelectPaginator;
 use Application\Model\ApplicationAbstractBase;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Predicate\NotIn as NotInPredicate;
+use Zend\Db\Sql\Predicate\In as InPredicate;
 use Zend\Db\ResultSet\ResultSet;
 use Exception;
 
@@ -546,5 +547,61 @@ class PaymentBase extends ApplicationAbstractBase
         $result = $statement->execute();
 
         return $result->current();
+    }
+
+    /**
+     * Get exchange rates
+     *
+     * @param boolean $excludePrimary
+     * @return array
+     */
+    public function getExchangeRates($excludePrimary = true)
+    {
+        // generate cache name
+        $cacheName = CacheUtility::getCacheName(self::CACHE_EXCHANGE_RATES, [$excludePrimary]);
+
+        // check data in cache
+        if (null === ($rates = $this->staticCacheInstance->getItem($cacheName))) {
+            $select = $this->select();
+            $select->from(['a' => 'payment_currency'])
+                ->columns([
+                    'id',
+                    'code',
+                    'name',
+                    'primary_currency'
+                ])
+                ->join(
+                    ['b' => 'payment_exchange_rate'],
+                    new Expression('a.id = b.currency'),
+                    [
+                        'rate'
+                    ],
+                    'left'
+                );
+
+            if ($excludePrimary) {
+                $select->where([
+                    new NotInPredicate('primary_currency', [self::PRIMARY_CURRENCY])
+                ]);
+            }
+
+            $statement = $this->prepareStatementForSqlObject($select);
+            $result = $statement->execute();
+
+            foreach ($result as $rate) {
+                $rates[$rate['code']] = [
+                    'id' => $rate['id'],
+                    'code' => $rate['code'],
+                    'name' => $rate['name'],
+                    'rate' => $rate['rate'],
+                    'primary_currency' => $rate['primary_currency']
+                ];    
+            }
+
+            // save data in cache
+            $this->staticCacheInstance->setItem($cacheName, $rates);
+        }
+
+        return $rates;        
     }
 }

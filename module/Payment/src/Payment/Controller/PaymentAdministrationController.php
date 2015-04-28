@@ -633,4 +633,61 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
             'coupon_form' => $couponForm->getForm()
         ]);
     }
+
+    /**
+     * Edit exchange rates action
+     */
+    public function editExchangeRatesAction()
+    {
+        // get the currency info
+        if (null == ($currency = $this->getModel()->getCurrencyInfo($this->
+                getSlug(), true)) || null == ($exchangeRates = $this->getModel()->getExchangeRates())) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        $exchangeRatesForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentExchnageRate')
+            ->setExchangeRates($exchangeRates);
+
+        $request = $this->getRequest();
+
+        // validate the form
+        if ($request->isPost()) {
+            // fill the form with received values
+            $exchangeRatesForm->getForm()->setData($request->getPost(), false);
+
+            // save data
+            if ($exchangeRatesForm->getForm()->isValid()) {
+                // check the permission and increase permission's actions track
+                if (true !== ($result = $this->aclCheckPermission())) {
+                    return $result;
+                }
+
+                // edit the exchange rates
+                if (true == ($result = $this->getModel()->
+                        editExchangeRates($exchangeRates, $exchangeRatesForm->getForm()->getData(), $currency['id']))) {
+
+                    $this->flashMessenger()
+                        ->setNamespace('success')
+                        ->addMessage($this->getTranslator()->translate('Exchange rates have been edited'));
+                }
+                else {
+                    $this->flashMessenger()
+                        ->setNamespace('error')
+                        ->addMessage($this->getTranslator()->translate($result));
+                }
+
+                return $this->redirectTo('payments-administration', 'edit-exchange-rates', [
+                    'slug' => $currency['id']
+                ]);
+            }
+        }
+
+        return new ViewModel([
+            'currency' => $currency,
+            'exchange_form' => $exchangeRatesForm->getForm()
+        ]);
+    }
 }

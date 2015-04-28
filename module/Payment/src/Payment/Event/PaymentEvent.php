@@ -50,6 +50,32 @@ class PaymentEvent extends ApplicationAbstractEvent
     const EDIT_DISCOUNT_COUPON = 'edit_discount_coupon';
 
     /**
+     * Edit exchange rates event
+     */
+    const EDIT_EXCHANGE_RATES = 'edit_exchange_rates';
+
+    /**
+     * Fire edit exchange rates event
+     *
+     * @param integer $currencyId
+     * @return void
+     */
+    public static function fireEditExchangeRatesEvent($currencyId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Payment exchange rates edited by guest'
+            : 'Event - Payment exchange rates edited by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$currencyId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $currencyId];
+
+        self::fireEvent(self::EDIT_EXCHANGE_RATES, 
+                $currencyId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire edit discount coupon event
      *
      * @param integer $couponId

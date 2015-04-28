@@ -325,8 +325,8 @@ class PaymentAdministration extends PaymentBase
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
-            if (!$currencyInfo['primary_currency']) {
-                $currencyInfo['primary_currency'] = self::NOT_PRIMARY_CURRENCY;
+            if (empty($currencyInfo['primary_currency'])) {
+                $currencyInfo['primary_currency'] = $oldCurrencyInfo['primary_currency'];
             }
 
             $update = $this->update()
@@ -595,6 +595,59 @@ class PaymentAdministration extends PaymentBase
 
         // fire the edit discount coupon event
         PaymentEvent::fireEditDiscountCouponEvent($id);
+        return true;
+    }
+
+    /**
+     * Edit exchange rates
+     *
+     * @param array $exchangeRatesInfo
+     *      integer id
+     *      string code
+     *      sting name
+     *      float rate
+     * @param array $exchangeRates
+     *      float rate
+     * @param integer $currencyId
+     * @return boolean|string
+     */
+    public function editExchangeRates(array $exchangeRatesInfo, array $exchangeRates, $currencyId)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            // delete old rates
+            $this->clearExchangeRates();
+
+            // insert new rates
+            foreach ($exchangeRates as $code => $rate) {
+                // skip empty values
+                if (!(float) $rate) {
+                    continue;
+                }
+
+                $insert = $this->insert()
+                    ->into('payment_exchange_rate')
+                    ->values([
+                        'rate' => $rate,
+                        'currency' => $exchangeRatesInfo[$code]['id']
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($insert);
+                $statement->execute();
+            }
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        // fire the edit exchange rates event
+        PaymentEvent::fireEditExchangeRatesEvent($currencyId);
         return true;
     }
 }

@@ -242,6 +242,15 @@ SET @settingId = (SELECT LAST_INSERT_ID());
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId,  'xxxx', NULL);
 
+-- system pages and widgets
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentShoppingCartWidget', @moduleId, 'system', 'Shopping cart', NULL, NULL, NULL);
+SET @paymentShoppingCartWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
+(@paymentShoppingCartWidgetId, 2);
+
 -- module tables
 
 CREATE TABLE IF NOT EXISTS `payment_module` (

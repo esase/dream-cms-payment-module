@@ -3,6 +3,7 @@ namespace Payment\Model;
 
 use Application\Utility\ApplicationCache as CacheUtility;
 use Payment\Event\PaymentEvent;
+use Payment\Service\PaymentService;
 use Application\Utility\ApplicationErrorLogger;
 use Application\Service\ApplicationSetting as SettingService;
 use Application\Utility\ApplicationPagination as PaginationUtility;
@@ -13,6 +14,8 @@ use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Predicate\NotIn as NotInPredicate;
 use Zend\Db\Sql\Predicate\In as InPredicate;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Http\Header\SetCookie;
+use Zend\Db\Sql\Predicate\Literal as LiteralPredicate;
 use Exception;
 
 class PaymentBase extends ApplicationAbstractBase
@@ -96,6 +99,208 @@ class PaymentBase extends ApplicationAbstractBase
      * Allowed slug chars
      */
     const ALLOWED_SLUG_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
+     * Shopping cart cookie
+     */ 
+    const SHOPPING_CART_COOKIE = 'shopping_cart';
+
+    /**
+     * Shopping cart id length
+     */
+    const SHOPPING_CART_ID_LENGTH = 50;
+
+    /**
+     * Get shopping cart id
+     *
+     * @return string
+     */
+    public function getShoppingCartId()
+    {
+        return current(explode( '|', $this->_getShoppingCartId()));
+    }
+
+    /**
+     * Get an active coupon info
+     *
+     * @param string|integer $id
+     * @param string $field
+     * @return array
+     */
+    public function getActiveCouponInfo($id, $field = 'slug')
+    {
+        $time = time();
+        $select = $this->select();
+        $select->from('payment_discount_cupon')
+            ->columns([
+                'id',
+                'slug',
+                'discount',
+                'used',
+                'date_start',
+                'date_end'
+            ])
+            ->where([
+                ($field == 'id' ? $field : 'slug') => $id,
+                'used' => self::COUPON_NOT_USED
+            ])
+            ->where([
+                new LiteralPredicate('(date_start = 0 or 
+                        (' . $time . ' >= date_start)) and (date_end = 0 or (' . $time . ' <= date_end))')
+            ]);
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        return $resultSet->current() ? $resultSet->current() : array();
+    }
+
+    /**
+     * Get discounted items amount
+     *
+     * @param float $itemsAmount
+     * @param float $discount
+     * @return float|integer
+     */
+    public function getDiscountedItemsAmount($itemsAmount, $discount)
+    {
+        return $itemsAmount - ($itemsAmount * $discount / 100);
+    }
+
+    /**
+     * Get items amount
+     *
+     * @param array $itemsList
+     *      float cost
+     *      integer count
+     *      float discount
+     * @param float $discount
+     * @param boolean $rounding
+     * @return float|integer
+     */
+    public function getItemsAmount(array $itemsList, $discount = 0, $rounding = false)
+    {
+        $itemsAmount = 0;
+        foreach($itemsList as $itemInfo) {
+            $itemsAmount += (float) $itemInfo['cost'] * (int) $itemInfo['count'] - (float) $itemInfo['discount'];
+        }
+
+        // calculate the discount
+        if ($discount) {
+            $itemsAmount = $this->getDiscountedItemsAmount($itemsAmount, $discount);
+        }
+
+        return $rounding
+            ? PaymentService::roundingCost($itemsAmount)
+            : $itemsAmount;
+    }
+
+    /**
+     * Get all active shopping cart items
+     *
+     * @param boolean $onlyActive
+     * @return array
+     */
+    public function getAllShoppingCartItems($onlyActive = true)
+    {
+        $select = $this->select();
+        $select->from(['a' => 'payment_shopping_cart'])
+            ->columns([
+                'id',
+                'object_id',
+                'cost',
+                'module',
+                'title',
+                'slug',
+                'discount',
+                'count'
+            ])
+            ->join(
+                ['b' => 'payment_module'],
+                'a.module = b.module',
+                [
+                    'countable',
+                    'must_login',
+                    'handler'
+                ]
+            )
+            ->join(
+                ['c' => 'application_module'],
+                new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
+                []
+            )
+            ->where([
+                'a.shopping_cart_id' => $this->getShoppingCartId()
+            ]);
+
+        if ($onlyActive) {
+            $select->where([
+                'a.active' => self::ITEM_ACTIVE,
+                'a.available' => self::ITEM_AVAILABLE,
+                'a.deleted' => self::ITEM_NOT_DELETED                
+            ]);
+        }
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        return $resultSet->toArray();
+    }
+
+    /**
+     * Save a shopping cart cookie
+     *
+     * @param string $value
+     * @return void
+     */
+    private function _saveShoppingCartCookie($value)
+    {
+        $header = new SetCookie();
+        $header->setName(self::SHOPPING_CART_COOKIE)
+            ->setValue($value)
+            ->setPath('/')
+            ->setHttpOnly(true)
+            ->setExpires(time() + (int) SettingService::getSetting('payment_shopping_cart_session_time'));
+
+        $this->serviceLocator->get('Response')->getHeaders()->addHeader($header);
+    }
+
+    /**
+     * Get shopping cart uid
+     *
+     * @return string
+     */
+    private function _getShoppingCartId()
+    {
+        $request  = $this->serviceLocator->get('Request');
+        $shoppingCartId = !empty($request->getCookie()->{self::SHOPPING_CART_COOKIE})
+            ? $request->getCookie()->{self::SHOPPING_CART_COOKIE}
+            : null;
+
+        // generate a new shopping cart id
+        if (!$shoppingCartId) {
+            // generate a new hash
+            $shoppingCartId =  md5(time() . '_' . $this->generateRandString(self::SHOPPING_CART_ID_LENGTH));
+            $this->_saveShoppingCartCookie($shoppingCartId);
+        }
+
+        return $shoppingCartId;
+    }
+
+    /**
+     * Get shopping cart currency
+     *
+     * @return string
+     */
+    public function getShoppingCartCurrency()
+    {
+        $currencyId = explode( '|', $this->_getShoppingCartId());
+        return count($currencyId) == 2
+            ? end($currencyId)
+            : null;
+    }
 
     /**
      * Activate transaction

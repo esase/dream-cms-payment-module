@@ -63,8 +63,12 @@ class Module implements ConsoleUsageProviderInterface
     {
         return [
             'invokables' => [
+                'paymentShoppingCartWidget' => 'Payment\View\Widget\PaymentShoppingCartWidget',
                 'paymentCostFormat' => 'Payment\View\Helper\PaymentCostFormat',
-                'paymentItemStatus' => 'Payment\View\Helper\PaymentItemStatus'
+                'paymentItemStatus' => 'Payment\View\Helper\PaymentItemStatus',
+                'paymentCurrency' => 'Payment\View\Helper\PaymentCurrency',
+                'paymentShoppingCart' => 'Payment\View\Helper\PaymentShoppingCart',
+                'paymentProcessCost' => 'Payment\View\Helper\PaymentProcessCost'
             ],
             'factories' => [
             ]

@@ -2,7 +2,7 @@
 namespace Payment\View\Helper;
  
 use Zend\View\Helper\AbstractHelper;
-use Payment\Service\Service as PaymentService;
+use Payment\Service\Payment as PaymentService;
 
 class PaymentCostFormat extends AbstractHelper
 {

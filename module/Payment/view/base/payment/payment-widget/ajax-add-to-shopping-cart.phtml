@@ -1,0 +1,40 @@
+<?php $this->declareVars('formWrapper') ?>
+
+<?php if ($this->shoppingcart_form) : ?>
+    <!-- render a form -->
+    <?php $this->formWrapper = $this->partial('partial/form', [
+        'form' => $this->shoppingcart_form,
+    ]) ?>
+<?php endif ?>
+    
+<?php $this->placeholder('contentBody')->captureStart() ?>
+    <?php if ($this->message) : ?>
+        <p><?php echo $this->message ?></p>
+    <?php endif ?>
+<?php $this->placeholder('contentBody')->captureEnd() ?>
+
+<?php $this->placeholder('contentFooter')->captureStart() ?>
+    <?php if ($this->shoppingcart_form) : ?>
+        <button type="button" onclick="payment.sendShoppingCartForm()" class="btn btn-primary"><?php echo $this->translate('Add') ?></button>
+    <?php endif ?>
+
+    <script type="text/javascript">
+        $("#popup-shopping-cart-window").find("form:first").bind('submit', function() {
+            payment.sendShoppingCartForm();
+            return false;
+        });
+
+        <?php if ($this->update_shoping_cart) : ?>
+            payment.updateShoppingCart();
+        <?php endif ?>
+    </script>
+<?php $this->placeholder('contentFooter')->captureEnd() ?>
+
+<?php 
+    echo $this->partial('partial/popup', [
+        'popup_id' => 'popup-shopping-cart-window',
+        'title' => 'Add the item to the shopping cart',
+        'body' => $this->formWrapper . $this->placeholder('contentBody'),
+        'footer' => $this->placeholder('contentFooter')
+    ]) 
+?>

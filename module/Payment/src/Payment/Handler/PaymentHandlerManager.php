@@ -2,10 +2,10 @@
 namespace Payment\Handler;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
-use Payment\Handler\InterfaceHandler as PaymentInterfaceHandler;
+use Payment\Handler\PaymentInterfaceHandler;
 use Payment\Exception\PaymentException;
 
-class HandlerManager
+class PaymentHandlerManager
 {
     /**
      * List of instances
@@ -34,7 +34,7 @@ class HandlerManager
      *
      * @papam string $name
      * @throws Payment\Exception\PaymentException
-     * @return object|boolean
+     * @return Payment\Handler\PaymentInterfaceHandler|boolean
      */
     public function getInstance($name)
     {
@@ -49,7 +49,7 @@ class HandlerManager
         $handler = new $name($this->serviceLocator);
 
         if (!$handler instanceof PaymentInterfaceHandler) {
-            throw new PaymentException(sprintf('The file "%s" must be an object implementing Payment\Handler\InterfaceHandler', $name));
+            throw new PaymentException(sprintf('The file "%s" must be an object implementing Payment\Handler\PaymentInterfaceHandler', $name));
         }
 
         $this->instances[$name] = $handler;

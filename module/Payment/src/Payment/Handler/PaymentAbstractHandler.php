@@ -3,7 +3,7 @@ namespace Payment\Handler;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-abstract class AbstractHandler implements InterfaceHandler
+abstract class PaymentAbstractHandler implements PaymentInterfaceHandler
 {
     /**
      * Service locator

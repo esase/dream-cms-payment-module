@@ -47,7 +47,9 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('delete_discount_coupon', @moduleId, 'Event - Deleting discount coupons'),
 ('add_discount_coupon', @moduleId, 'Event - Adding discount coupons'),
 ('edit_discount_coupon', @moduleId, 'Event - Editing discount coupons'),
-('edit_exchange_rates', @moduleId, 'Event - Editing exchange rates');
+('edit_exchange_rates', @moduleId, 'Event - Editing exchange rates'),
+('add_item_to_shopping_cart', @moduleId, 'Event - Adding items to the shopping cart'),
+('delete_item_from_shopping_cart', @moduleId, 'Event - Deleting items from the shopping cart');
 
 -- application settings
 
@@ -245,6 +247,13 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 -- system pages and widgets
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentInitShoppingCartWidget', @moduleId, 'system', 'Init shopping cart', NULL, NULL, NULL);
+SET @paymentShoppingCartWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
+(@paymentShoppingCartWidgetId, 1);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
 ('paymentShoppingCartWidget', @moduleId, 'system', 'Shopping cart', NULL, NULL, NULL);
 SET @paymentShoppingCartWidgetId = (SELECT LAST_INSERT_ID());
 
@@ -262,7 +271,6 @@ CREATE TABLE IF NOT EXISTS `payment_module` (
     `view_check` VARCHAR(255) NOT NULL,
     `countable` TINYINT(1) NOT NULL,
     `multi_costs` TINYINT(1) NOT NULL,
-    `extra_options` TINYINT(1) NOT NULL,
     `must_login` TINYINT(1) UNSIGNED NOT NULL,
     `handler` VARCHAR(100) NOT NULL,
     PRIMARY KEY (`module`),

@@ -52,6 +52,10 @@ class Module implements ConsoleUsageProviderInterface
     {
         return [
             'factories' => [
+                'Payment\Handler\PaymentHandlerManager' => function($serviceManager)
+                {
+                    return new Handler\PaymentHandlerManager($serviceManager);
+                },
             ]
         ];
     }
@@ -63,6 +67,7 @@ class Module implements ConsoleUsageProviderInterface
     {
         return [
             'invokables' => [
+                'paymentInitShoppingCartWidget' => 'Payment\View\Widget\PaymentInitShoppingCartWidget',
                 'paymentShoppingCartWidget' => 'Payment\View\Widget\PaymentShoppingCartWidget',
                 'paymentCostFormat' => 'Payment\View\Helper\PaymentCostFormat',
                 'paymentItemStatus' => 'Payment\View\Helper\PaymentItemStatus',

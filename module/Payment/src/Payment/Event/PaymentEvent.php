@@ -55,6 +55,61 @@ class PaymentEvent extends ApplicationAbstractEvent
     const EDIT_EXCHANGE_RATES = 'edit_exchange_rates';
 
     /**
+     * Add item to shopping cart event
+     */
+    const ADD_ITEM_TO_SHOPPING_CART = 'add_item_to_shopping_cart';
+
+    /**
+     * Delete item from shopping cart event
+     */
+    const DELETE_ITEM_FROM_SHOPPING_CART = 'delete_item_from_shopping_cart';
+
+    /**
+     * Fire delete item from shopping cart event
+     *
+     * @param integer $itemId
+     * @param boolean $isSystemEvent
+     * @return void
+     */
+    public static function fireDeleteItemFromShoppingCartEvent($itemId, $isSystemEvent = false)
+    {
+        // event's description
+        $eventDesc = $isSystemEvent
+            ? 'Event - Item deleted from shopping cart by the system'
+            : (UserIdentityService::isGuest() ? 'Event - Item deleted from shopping cart by guest'
+                    : 'Event - Item deleted from shopping cart by user');
+
+        $eventDescParams = $isSystemEvent
+            ? [$itemId]
+            : (UserIdentityService::isGuest() ? [$itemId]
+                    : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $itemId]);
+
+        self::fireEvent(self::DELETE_ITEM_FROM_SHOPPING_CART, 
+                $itemId, self::getUserId($isSystemEvent), $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire add item to shopping cart event
+     *
+     * @param integer $itemId
+     * @return void
+     */
+    public static function fireAddItemToShoppingCartEvent($itemId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Item added to shopping cart by guest'
+            : 'Event - Item added to shopping cart by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$itemId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $itemId];
+
+        self::fireEvent(self::ADD_ITEM_TO_SHOPPING_CART, 
+                $itemId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire edit exchange rates event
      *
      * @param integer $currencyId

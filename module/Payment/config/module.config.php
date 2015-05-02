@@ -3,7 +3,8 @@
 return [
     'controllers' => [
         'invokables' => [
-            'payments-administration' => 'Payment\Controller\PaymentAdministrationController'
+            'payments-administration' => 'Payment\Controller\PaymentAdministrationController',
+            'payments-widget' => 'Payment\Controller\PaymentWidgetController'
         ]
     ],
     'router' => [

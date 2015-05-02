@@ -26,6 +26,11 @@ class PaymentBase extends ApplicationAbstractBase
     const MODULE_COUNTABLE = 1;
 
     /**
+     * Module multi costs flag
+     */
+    const MODULE_MULTI_COSTS = 1;
+
+    /**
      * Transaction paid
      */
     const TRANSACTION_PAID = 1;
@@ -109,6 +114,52 @@ class PaymentBase extends ApplicationAbstractBase
      * Shopping cart id length
      */
     const SHOPPING_CART_ID_LENGTH = 50;
+
+    /**
+     * Delete the shopping cart's item
+     *
+     * @param integer $itemId
+     * @param boolean $useShoppingCartId
+     * @param boolean $isSystem
+     * @return boolean|string
+     */
+    public function deleteFromShoppingCart($itemId, $useShoppingCartId = true, $isSystem = false)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            $delete = $this->delete()
+                ->from('payment_shopping_cart')
+                ->where([
+                    'id' => $itemId
+                ]);
+
+            if ($useShoppingCartId) {
+                $delete->where([
+                   'shopping_cart_id' => $this->getShoppingCartId()
+                ]);
+            }
+
+            $statement = $this->prepareStatementForSqlObject($delete);
+            $result = $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        if ($result->count()) {
+            // fire the delete item from shopping cart event
+            PaymentEvent::fireDeleteItemFromShoppingCartEvent($itemId, $isSystem);
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Get shopping cart id

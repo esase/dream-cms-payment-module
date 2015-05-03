@@ -92,6 +92,15 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     }
 
     /**
+     * Change currency
+     */
+    public function ajaxChangeCurrencyAction()
+    {
+        $this->getModel()->setShoppingCartCurrency($this->params()->fromPost('currency'));
+        return $this->getResponse();
+    }
+
+    /**
      * Clean shopping cart
      */
     public function ajaxCleanShoppingCartAction()

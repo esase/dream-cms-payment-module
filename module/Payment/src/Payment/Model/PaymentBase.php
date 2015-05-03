@@ -116,6 +116,20 @@ class PaymentBase extends ApplicationAbstractBase
     const SHOPPING_CART_ID_LENGTH = 50;
 
     /**
+     * Save shopping cart currency
+     *
+     * @param string $currency
+     * @return void
+     */
+    public function setShoppingCartCurrency($currency)
+    {
+        $shoppingCartId = $this->getShoppingCartId();
+        $value = $shoppingCartId . '|' . $currency;
+
+        $this->_saveShoppingCartCookie($value);
+    }
+
+    /**
      * Delete the shopping cart's item
      *
      * @param integer $itemId

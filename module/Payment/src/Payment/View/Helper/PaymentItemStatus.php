@@ -17,7 +17,6 @@ class PaymentItemStatus extends AbstractHelper
      *      integer count
      *      integer active
      *      integer available
-     *      integer deleted
      *      string slug
      *      string view_controller
      *      string view_action
@@ -25,17 +24,12 @@ class PaymentItemStatus extends AbstractHelper
      *      integer must_login
      *      string handler
      *      integer object_id
-     *      integer module_extra_options
      *      srting module_state
      * @return string
      */
     public function __invoke($info)
     {
         // check the item's status
-        if ($info['deleted'] == PaymentBaseModel::ITEM_DELETED) {
-            return $this->getView()->translate('Item deleted');
-        }
-
         if ($info['active'] == PaymentBaseModel::ITEM_NOT_ACTIVE) {
             return  $this->getView()->translate('Item is not active');
         }

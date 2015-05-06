@@ -3,7 +3,7 @@ namespace Payment\View\Widget;
 
 use Page\View\Widget\PageAbstractWidget;
 
-class PaymentInitShoppingCartWidget extends PageAbstractWidget
+class PaymentInitShoppingCartInfoWidget extends PageAbstractWidget
 {
     /**
      * Include js and css files
@@ -31,6 +31,10 @@ class PaymentInitShoppingCartWidget extends PageAbstractWidget
      */
     public function getContent() 
     {
-        return $this->getView()->partial('payment/widget/init-shopping-cart');
+        if (false === ($pageUrl = $this->getView()->pageUrl('shopping-cart'))) {
+            return false;
+        }
+
+        return $this->getView()->partial('payment/widget/init-shopping-cart-info');
     }
 }

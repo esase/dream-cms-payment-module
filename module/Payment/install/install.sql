@@ -247,22 +247,35 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 -- system pages and widgets
 
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL);
 SET @shoppingCartPageId = (SELECT LAST_INSERT_ID());
 
-INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
-('paymentInitShoppingCartWidget', @moduleId, 'system', 'Init shopping cart', NULL, NULL, @shoppingCartPageId);
-SET @paymentShoppingCartWidgetId = (SELECT LAST_INSERT_ID());
-
-INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
-(@paymentShoppingCartWidgetId, 1);
+INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
+(@shoppingCartPageId, 1);
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
-('paymentShoppingCartWidget', @moduleId, 'system', 'Shopping cart', NULL, NULL, @shoppingCartPageId);
+('paymentShoppingCartWidget', @moduleId, 'public', 'Shopping cart', NULL, 1, @shoppingCartPageId);
 SET @paymentShoppingCartWidgetId = (SELECT LAST_INSERT_ID());
 
+INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
+(@shoppingCartPageId,  @paymentShoppingCartWidgetId,  1);
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@shoppingCartPageId,  @paymentShoppingCartWidgetId);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentInitShoppingCartInfoWidget', @moduleId, 'system', 'Init shopping cart', NULL, NULL, @shoppingCartPageId);
+SET @paymentShoppingCartInfoWidgetId = (SELECT LAST_INSERT_ID());
+
 INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
-(@paymentShoppingCartWidgetId, 2);
+(@paymentShoppingCartInfoWidgetId, 1);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentShoppingCartInfoWidget', @moduleId, 'system', 'Shopping cart info', NULL, NULL, @shoppingCartPageId);
+SET @paymentShoppingCartInfoWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
+(@paymentShoppingCartInfoWidgetId, 2);
 
 -- module tables
 
@@ -353,6 +366,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     `discount_cupon` SMALLINT(5) UNSIGNED DEFAULT NULL,
     `amount` DECIMAL(10,2) NOT NULL DEFAULT '0',
     `user_hidden` TINYINT(1) NOT NULL,
+    `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `slug` (`slug`),
     KEY `paid` (`paid`),
@@ -370,7 +384,10 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
         ON DELETE SET NULL,
     FOREIGN KEY (`discount_cupon`) REFERENCES `payment_discount_cupon`(`id`)
         ON UPDATE CASCADE
-        ON DELETE SET NULL    
+        ON DELETE SET NULL,
+    FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
@@ -382,14 +399,17 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     `cost` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
     `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
     `count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
-    `deleted` TINYINT(1) NOT NULL DEFAULT 0,
     `active` TINYINT(1) NOT NULL DEFAULT 1,
     `available` TINYINT(1) NOT NULL DEFAULT 1,
+    `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`object_id`, `module`, `transaction_id`),
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -407,12 +427,15 @@ CREATE TABLE IF NOT EXISTS `payment_shopping_cart` (
     `active` TINYINT(1) NOT NULL DEFAULT 1,
     `available` TINYINT(1) NOT NULL DEFAULT 1,
     `date` INT(10) UNSIGNED NOT NULL,
-    `deleted` TINYINT(1) NOT NULL DEFAULT 0,
+    `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY (`object_id`, `module`, `shopping_cart_id`),
-    KEY `available` (`active`,`available`,`deleted`,`shopping_cart_id`),
+    UNIQUE KEY (`object_id`, `module`, `shopping_cart_id`, `language`),
+    KEY `available` (`active`,`available`,`shopping_cart_id`, `language`),
     KEY `date` (`date`),
     FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

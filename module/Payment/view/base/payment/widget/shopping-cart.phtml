@@ -1,2 +1,76 @@
-<?php echo $this->render('payment/partial/shopping-cart') ?>
-<div class="clearfix"></div>
+
+<!-- render a data grid -->
+<?php echo $this->partial('partial/data-grid', [
+    'page_name' => $this->pageUrl('shopping-cart'),
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'id',
+    'default_order_type' => 'desc',
+    'headers' => [
+        [
+            'title' => $this->translate('ID'),
+            'order_name' => 'id'
+        ],
+        [
+            'title' => $this->translate('Title'),
+            'order_name' => 'title'
+        ],
+        [
+            'title' => $this->translate('Unit Price'),
+            'order_name' => 'cost'
+        ],
+        [
+            'title' => $this->translate('Discount'),
+            'order_name' => 'discount'
+        ],
+        [
+            'title' => $this->translate('Count'),
+            'order_name' => 'count'
+        ],
+        [
+            'title' => $this->translate('Total price'),
+            'order_name' => 'total'
+        ],
+        [
+            'title' => $this->translate('Status')
+        ]
+    ],
+    'paginator' => $this->paginator,
+    'skipped_fields' => [
+        'object_id',
+        'view_controller',
+        'view_action',
+        'countable',
+        'must_login',
+        'slug',
+        'available',
+        'multi_costs',
+        'handler',
+        'module_state'
+    ],
+    'helpers' => array(
+        //'title' => 'paymentItemLink',
+        'active' => 'paymentItemStatus',
+        'cost' => 'paymentProcessCost',
+        'discount' => 'paymentProcessCost',
+        'total' => 'paymentProcessCost'
+    ),
+    'helpers_set_array' => [
+        'active' => true,
+        'title' => true
+    ],
+    'helpers_options' => [
+    ],
+    'actions' => [
+    ],
+    'actions_options' => [
+        'action_identity' => 'id',
+        'form_name' => 'shopping-cart',
+        'multiple_actions' => [
+            'items_name' => 'items[]'
+        ]
+    ],
+    'actions_extra_check' => [
+    ]
+]) ?>

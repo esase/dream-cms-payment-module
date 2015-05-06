@@ -45,6 +45,14 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
      */
     protected function addToShoppingCart($itemInfo, PaymentInterfaceHandler $paymentHandler)
     {
+        // check an item existing in shopping cart
+        if (null != ($itemId = $this->
+                getModel()->inShoppingCart($itemInfo['object_id'], $itemInfo['module']))) {
+
+            // delete old item
+            $this->getModel()->deleteFromShoppingCart($itemId);
+        }
+
         $result = $this->getModel()->addToShoppingCart($itemInfo);
 
         if (is_numeric($result)) {
@@ -145,96 +153,87 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                 ->get('Payment\Handler\PaymentHandlerManager')
                 ->getInstance($moduleInfo['handler']);
 
-            // check an item existing in shopping cart
-            if (true === ($result = $this->
-                        getModel()->inShoppingCart($objectId, $moduleInfo['id']))) {
-
+            // get the item info
+            if (null == $objectInfo = $paymentHandler->getItemInfo($objectId)) {
                 $message = $this->getTranslator()->
-                        translate('Item already added into your shopping cart'); 
+                        translate('Sorry but the item not found or not activated');    
             }
             else {
-                // get the item info
-                if (null == $objectInfo = $paymentHandler->getItemInfo($objectId)) {
-                    $message = $this->getTranslator()->
-                            translate('Sorry but the item not found or not activated');    
+                // count is not available
+                if (PaymentBaseModel::MODULE_COUNTABLE ==
+                            $moduleInfo['countable'] && $objectInfo['count'] <= 0) {
+
+                    $message = $this->getTranslator()->translate('Item is not available');
                 }
                 else {
-                    // count is not available
-                    if (PaymentBaseModel::MODULE_COUNTABLE ==
-                                $moduleInfo['countable'] && $objectInfo['count'] <= 0) {
+                    // show an additional shopping cart form
+                    if ((float) $objectInfo['discount']
+                            || PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']
+                            || (PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] &&
+                                    ($count <= 0 || $count > $objectInfo['count'])))
+                    {
+                        // get the form instance
+                        $shoppingCartForm = $this->getServiceLocator()
+                            ->get('Application\Form\FormManager')
+                            ->getInstance('Payment\Form\PaymentShoppingCart')
+                            ->hideCountField($moduleInfo['countable'] != PaymentBaseModel::MODULE_COUNTABLE)
+                            ->setDiscount((float) $objectInfo['discount'])
+                            ->setCountLimit((PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $objectInfo['count'] : 0));
 
-                        $message = $this->getTranslator()->translate('Item is not available');
-                    }
-                    else {
-                        // show an additional shopping cart form
-                        if ((float) $objectInfo['discount']
-                                || PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']
-                                || (PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] &&
-                                        ($count <= 0 || $count > $objectInfo['count'])))
-                        {
-                            // get the form instance
-                            $shoppingCartForm = $this->getServiceLocator()
-                                ->get('Application\Form\FormManager')
-                                ->getInstance('Payment\Form\PaymentShoppingCart')
-                                ->hideCountField($moduleInfo['countable'] != PaymentBaseModel::MODULE_COUNTABLE)
-                                ->setDiscount((float) $objectInfo['discount'])
-                                ->setCountLimit((PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $objectInfo['count'] : 0));
-   
-                            if (PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']) {
-                                $shoppingCartForm->setTariffs($objectInfo['cost']);
-                            }
+                        if (PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']) {
+                            $shoppingCartForm->setTariffs($objectInfo['cost']);
+                        }
 
-                            // process the post request
-                            $request = $this->getRequest();
-                            $shoppingCartForm->getForm()->setData($request->getPost(), false);
+                        // process the post request
+                        $request = $this->getRequest();
+                        $shoppingCartForm->getForm()->setData($request->getPost(), false);
 
-                            // validate the form
-                            if ($request->isPost() && null !== $this->params()->fromPost('validate', null)) {
-                                if ($shoppingCartForm->getForm()->isValid()) {
-                                    $formData = $shoppingCartForm->getForm()->getData();
+                        // validate the form
+                        if ($request->isPost() && null !== $this->params()->fromPost('validate', null)) {
+                            if ($shoppingCartForm->getForm()->isValid()) {
+                                $formData = $shoppingCartForm->getForm()->getData();
 
-                                    $itemInfo = [
-                                        'object_id'     => $objectId,
-                                        'module'        => $moduleInfo['id'],
-                                        'title'         => $objectInfo['title'],
-                                        'slug'          => $objectInfo['slug'],
-                                        'cost'          => !empty($formData['cost']) ? $formData['cost'] : $objectInfo['cost'],
-                                        'discount'      => !empty($formData['discount']) ? (float) $objectInfo['discount'] : 0,
-                                        'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1
-                                    ];
+                                $itemInfo = [
+                                    'object_id'     => $objectId,
+                                    'module'        => $moduleInfo['id'],
+                                    'title'         => $objectInfo['title'],
+                                    'slug'          => $objectInfo['slug'],
+                                    'cost'          => !empty($formData['cost']) ? $formData['cost'] : $objectInfo['cost'],
+                                    'discount'      => !empty($formData['discount']) ? (float) $objectInfo['discount'] : 0,
+                                    'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1
+                                ];
 
-                                    // add the item into the shopping cart
-                                    $shoppingCartForm = null;
-                                    if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
-                                        $updateShopingCart = true;
-                                        $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
-                                    }
-                                    else {
-                                        $message = $this->getTranslator()->translate('Error occurred');
-                                    }
+                                // add the item into the shopping cart
+                                $shoppingCartForm = null;
+                                if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
+                                    $updateShopingCart = true;
+                                    $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
+                                }
+                                else {
+                                    $message = $this->getTranslator()->translate('Error occurred');
                                 }
                             }
                         }
-                        else {
-                            $itemInfo = [
-                                'object_id'     => $objectId,
-                                'module'        => $moduleInfo['id'],
-                                'title'         => $objectInfo['title'],
-                                'slug'          => $objectInfo['slug'],
-                                'cost'          => $objectInfo['cost'],
-                                'discount'      => 0,
-                                'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1,
-                            ];
-    
-                            if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
-                                $updateShopingCart = true;
-                                $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
-                            }
-                            else {
-                                $message = $this->getTranslator()->translate('Error occurred');
-                            }   
-                        }                        
                     }
+                    else {
+                        $itemInfo = [
+                            'object_id'     => $objectId,
+                            'module'        => $moduleInfo['id'],
+                            'title'         => $objectInfo['title'],
+                            'slug'          => $objectInfo['slug'],
+                            'cost'          => $objectInfo['cost'],
+                            'discount'      => 0,
+                            'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1,
+                        ];
+
+                        if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
+                            $updateShopingCart = true;
+                            $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
+                        }
+                        else {
+                            $message = $this->getTranslator()->translate('Error occurred');
+                        }   
+                    }                        
                 }
             }
         }

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-04-27 17:15+0600\n"
+"PO-Revision-Date: 2015-05-06 10:21+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -353,9 +353,6 @@ msgstr "Item count must be less or equal %d"
 
 msgid "Max items count description"
 msgstr "Maximum allowed items count is %d"
-
-msgid "Item already added into your shopping cart"
-msgstr "Item already added into your shopping cart"
 
 msgid "Item has been added to your shopping cart"
 msgstr "Item has been added to your shopping cart"

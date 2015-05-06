@@ -23,7 +23,10 @@ class PaymentShoppingCart extends AbstractHelper
      */
     public function __construct()
     {
-        $this->itemsCount  = count(PaymentService::getActiveShoppingCartItems());
+        array_walk(PaymentService::getActiveShoppingCartItems(), function($item){
+            $this->itemsCount  += $item['count'];
+        });
+
         $this->itemsAmount = PaymentService::getActiveShoppingCartItemsAmount();
     }
 

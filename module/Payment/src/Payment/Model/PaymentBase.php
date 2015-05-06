@@ -61,16 +61,6 @@ class PaymentBase extends ApplicationAbstractBase
     const ITEM_AVAILABLE = 1;
 
     /**
-     * Item deleted flag
-     */ 
-    const ITEM_DELETED = 1;
-
-    /**
-     * Item not deleted flag
-     */ 
-    const ITEM_NOT_DELETED = 0;
-
-    /**
      * Item is not active flag
      */ 
     const ITEM_NOT_ACTIVE = 0;
@@ -294,18 +284,19 @@ class PaymentBase extends ApplicationAbstractBase
                 ['c' => 'application_module'],
                 new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
                 []
-            )
-            ->where([
-                'a.shopping_cart_id' => $this->getShoppingCartId()
-            ]);
+            );
 
         if ($onlyActive) {
             $select->where([
                 'a.active' => self::ITEM_ACTIVE,
-                'a.available' => self::ITEM_AVAILABLE,
-                'a.deleted' => self::ITEM_NOT_DELETED                
+                'a.available' => self::ITEM_AVAILABLE               
             ]);
         }
+
+        $select->where([
+            'a.shopping_cart_id' => $this->getShoppingCartId(),
+            'a.language' => $this->getCurrentLanguage()
+        ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;
@@ -456,8 +447,7 @@ class PaymentBase extends ApplicationAbstractBase
         if ($onlyActive) {
             $select->where([
                 'a.active' => self::ITEM_ACTIVE,
-                'a.available' => self::ITEM_AVAILABLE,
-                'a.deleted' => self::ITEM_NOT_DELETED                
+                'a.available' => self::ITEM_AVAILABLE             
             ]);
         }
 
@@ -598,7 +588,6 @@ class PaymentBase extends ApplicationAbstractBase
                 'total' => new Expression('cost * count - discount'),
                 'active',
                 'available',
-                'deleted',
                 'slug'
             ])
             ->join(

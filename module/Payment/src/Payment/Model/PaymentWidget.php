@@ -4,11 +4,92 @@ namespace Payment\Model;
 
 use Payment\Event\PaymentEvent;
 use Application\Utility\ApplicationErrorLogger;
+use Application\Service\ApplicationSetting as SettingService;
+use Application\Utility\ApplicationPagination as PaginationUtility;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Expression as Expression;
+use Zend\Paginator\Paginator;
+use Zend\Paginator\Adapter\DbSelect as DbSelectPaginator;
 use Exception;
 
 class PaymentWidget extends PaymentBase
 {
+    
+    /**
+     * Get shopping cart items
+     *
+     * @param integer $page
+     * @param integer $perPage
+     * @param string $orderBy
+     * @param string $orderType
+     * @return object
+     */
+    public function getShoppingCartItems($page = 1, $perPage = 0, $orderBy = null, $orderType = null)
+    {
+        $orderFields = [
+            'id',
+            'title',
+            'cost',
+            'discount',
+            'count',
+            'total'
+        ];
+
+        $orderType = !$orderType || $orderType == 'desc'
+            ? 'desc'
+            : 'asc';
+
+        $orderBy = $orderBy && in_array($orderBy, $orderFields)
+            ? $orderBy
+            : 'id';
+
+        $select = $this->select();
+        $select->from(['a' => 'payment_shopping_cart'])
+            ->columns([
+                'id',
+                'object_id',
+                'title',
+                'cost',
+                'discount',
+                'count',
+                'total' => new Expression('cost * count - discount'),
+                'active',
+                'available',
+                'slug'
+            ])
+            ->join(
+                ['b' => 'payment_module'],
+                'a.module = b.module',
+                [
+                    'view_controller',
+                    'view_action',
+                    'countable',
+                    'multi_costs',
+                    'must_login',
+                    'handler'
+                ]
+            )
+            ->join(
+                ['c' => 'application_module'],
+                'b.module = c.id',
+                [
+                    'module_state' => 'status'
+                ]
+            )
+            ->order($orderBy . ' ' . $orderType)
+            ->where(array(
+                'shopping_cart_id' => $this->getShoppingCartId(),
+                'language' => $this->getCurrentLanguage()
+            ));
+
+        $paginator = new Paginator(new DbSelectPaginator($select, $this->adapter));
+        $paginator->setCurrentPageNumber($page);
+        $paginator->setItemCountPerPage(PaginationUtility::processPerPage($perPage));
+        $paginator->setPageRange(SettingService::getSetting('application_page_range'));
+
+        return $paginator;
+    }
+
     /**
      * Add to shopping cart
      *
@@ -33,7 +114,8 @@ class PaymentWidget extends PaymentBase
                 ->into('payment_shopping_cart')
                 ->values(array_merge($itemInfo, [
                     'shopping_cart_id' => $this->getShoppingCartId(),
-                    'date' => time()
+                    'date' => time(),
+                    'language' => $this->getCurrentLanguage()
                 ]));
 
             $statement = $this->prepareStatementForSqlObject($insert);
@@ -59,7 +141,7 @@ class PaymentWidget extends PaymentBase
      *
      * @param integer $objectId
      * @param integer $module
-     * @return boolean
+     * @return integer
      */
     public function inShoppingCart($objectId, $module)
     {
@@ -71,14 +153,15 @@ class PaymentWidget extends PaymentBase
             ->where([
                 'object_id' => $objectId,
                 'module' => $module,
-                'shopping_cart_id' => $this->getShoppingCartId()            
+                'shopping_cart_id' => $this->getShoppingCartId(),
+                'language' => $this->getCurrentLanguage()
             ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;
         $resultSet->initialize($statement->execute());
 
-        return $resultSet->current() ? true : false;
+        return $resultSet->current() ? $resultSet->current()->id : null;
     }
 
     /**

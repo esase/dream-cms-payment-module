@@ -14,7 +14,55 @@ use Exception;
 
 class PaymentWidget extends PaymentBase
 {
-    
+    /**
+     * Get the shopping cart's item info
+     *
+     * @param integer $itemId
+     * @param boolean $checkModuleState
+     * @return array
+     */
+    public function getShoppingCartItemInfo($itemId, $checkModuleState = true)
+    {
+        $select = $this->select();
+        $select->from(['a' => 'payment_shopping_cart'])
+            ->columns([
+                'id',
+                'object_id',
+                'cost',
+                'discount',
+                'count'
+            ])
+            ->join(
+                ['b' => 'payment_module'],
+                'a.module = b.module',
+                [
+                    'module',
+                    'countable',
+                    'multi_costs',
+                    'must_login',
+                    'handler'
+                ]
+            );
+
+        if ($checkModuleState) {
+            $select->join(
+                ['c' => 'application_module'],
+                new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
+                []
+            );
+        }
+
+        $select->where([
+            'a.id' => $itemId,
+            'a.shopping_cart_id' => $this->getShoppingCartId()
+        ]);
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        return $result->current();
+    }
+
     /**
      * Get shopping cart items
      *
@@ -22,7 +70,7 @@ class PaymentWidget extends PaymentBase
      * @param integer $perPage
      * @param string $orderBy
      * @param string $orderType
-     * @return object
+     * @return Zend\Paginator\Paginator
      */
     public function getShoppingCartItems($page = 1, $perPage = 0, $orderBy = null, $orderType = null)
     {
@@ -47,34 +95,21 @@ class PaymentWidget extends PaymentBase
         $select->from(['a' => 'payment_shopping_cart'])
             ->columns([
                 'id',
-                'object_id',
                 'title',
                 'cost',
                 'discount',
                 'count',
-                'total' => new Expression('cost * count - discount'),
-                'active',
-                'available',
-                'slug'
+                'total' => new Expression('cost * count - discount')
             ])
             ->join(
                 ['b' => 'payment_module'],
                 'a.module = b.module',
-                [
-                    'view_controller',
-                    'view_action',
-                    'countable',
-                    'multi_costs',
-                    'must_login',
-                    'handler'
-                ]
+                []
             )
             ->join(
                 ['c' => 'application_module'],
-                'b.module = c.id',
-                [
-                    'module_state' => 'status'
-                ]
+                new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
+                []
             )
             ->order($orderBy . ' ' . $orderType)
             ->where(array(
@@ -86,7 +121,7 @@ class PaymentWidget extends PaymentBase
         $paginator->setCurrentPageNumber($page);
         $paginator->setItemCountPerPage(PaginationUtility::processPerPage($perPage));
         $paginator->setPageRange(SettingService::getSetting('application_page_range'));
-
+        
         return $paginator;
     }
 

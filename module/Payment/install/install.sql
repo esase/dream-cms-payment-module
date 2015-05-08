@@ -49,7 +49,9 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('edit_discount_coupon', @moduleId, 'Event - Editing discount coupons'),
 ('edit_exchange_rates', @moduleId, 'Event - Editing exchange rates'),
 ('add_item_to_shopping_cart', @moduleId, 'Event - Adding items to the shopping cart'),
-('delete_item_from_shopping_cart', @moduleId, 'Event - Deleting items from the shopping cart');
+('delete_item_from_shopping_cart', @moduleId, 'Event - Deleting items from the shopping cart'),
+('activate_discount_coupon', @moduleId, 'Event - Activating discount coupons'),
+('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons');
 
 -- application settings
 
@@ -420,17 +422,14 @@ CREATE TABLE IF NOT EXISTS `payment_shopping_cart` (
     `module` SMALLINT(5) UNSIGNED NOT NULL,
     `title` VARCHAR(100) NOT NULL,
     `slug` VARCHAR(100) NOT NULL,
-    `cost` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
-    `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
-    `count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
+    `cost` DECIMAL(10,2) UNSIGNED NOT NULL,
+    `discount` DECIMAL(10,2) UNSIGNED DEFAULT NULL,
+    `count` SMALLINT(5) UNSIGNED NOT NULL,
     `shopping_cart_id` CHAR(32) NOT NULL,
-    `active` TINYINT(1) NOT NULL DEFAULT 1,
-    `available` TINYINT(1) NOT NULL DEFAULT 1,
     `date` INT(10) UNSIGNED NOT NULL,
     `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`object_id`, `module`, `shopping_cart_id`, `language`),
-    KEY `available` (`active`,`available`,`shopping_cart_id`, `language`),
     KEY `date` (`date`),
     FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
         ON UPDATE CASCADE

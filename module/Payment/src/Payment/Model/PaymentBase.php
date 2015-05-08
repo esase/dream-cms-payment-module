@@ -51,26 +51,6 @@ class PaymentBase extends ApplicationAbstractBase
     const NOT_PRIMARY_CURRENCY = 0;
 
     /**
-     * Item is active flag
-     */ 
-    const ITEM_ACTIVE = 1;
-
-    /**
-     * Item is available flag
-     */ 
-    const ITEM_AVAILABLE = 1;
-
-    /**
-     * Item is not active flag
-     */ 
-    const ITEM_NOT_ACTIVE = 0;
-
-    /**
-     * Item is not available flag
-     */ 
-    const ITEM_NOT_AVAILABLE = 0;
-
-    /**
      * Payment exchange rates cache
      */
     const CACHE_EXCHANGE_RATES = 'Payment_Exchange_Rates';
@@ -200,15 +180,15 @@ class PaymentBase extends ApplicationAbstractBase
                 'used' => self::COUPON_NOT_USED
             ])
             ->where([
-                new LiteralPredicate('(date_start = 0 or 
-                        (' . $time . ' >= date_start)) and (date_end = 0 or (' . $time . ' <= date_end))')
+                new LiteralPredicate('(date_start IS NULL or
+                        (' . $time . ' >= date_start)) and (date_end IS NULL or (' . $time . ' <= date_end))')
             ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;
         $resultSet->initialize($statement->execute());
 
-        return $resultSet->current() ? $resultSet->current() : array();
+        return $resultSet->current() ? $resultSet->current() : [];
     }
 
     /**
@@ -252,12 +232,11 @@ class PaymentBase extends ApplicationAbstractBase
     }
 
     /**
-     * Get all active shopping cart items
+     * Get all shopping cart items
      *
-     * @param boolean $onlyActive
      * @return array
      */
-    public function getAllShoppingCartItems($onlyActive = true)
+    public function getAllShoppingCartItems()
     {
         $select = $this->select();
         $select->from(['a' => 'payment_shopping_cart'])
@@ -284,19 +263,11 @@ class PaymentBase extends ApplicationAbstractBase
                 ['c' => 'application_module'],
                 new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
                 []
-            );
-
-        if ($onlyActive) {
-            $select->where([
-                'a.active' => self::ITEM_ACTIVE,
-                'a.available' => self::ITEM_AVAILABLE               
+            )
+            ->where([
+                'a.shopping_cart_id' => $this->getShoppingCartId(),
+                'a.language' => $this->getCurrentLanguage()
             ]);
-        }
-
-        $select->where([
-            'a.shopping_cart_id' => $this->getShoppingCartId(),
-            'a.language' => $this->getCurrentLanguage()
-        ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;
@@ -518,14 +489,14 @@ class PaymentBase extends ApplicationAbstractBase
 
             $delete = $this->delete()
                 ->from('payment_transaction_list')
-                ->where(array(
+                ->where([
                     'id' => $transactionId
-                ));
+                ]);
 
             if ($userId) {
-                $delete->where(array(
+                $delete->where([
                     'user_id' => $userId
-                ));
+                ]);
             }
 
             $statement = $this->prepareStatementForSqlObject($delete);

@@ -65,6 +65,58 @@ class PaymentEvent extends ApplicationAbstractEvent
     const DELETE_ITEM_FROM_SHOPPING_CART = 'delete_item_from_shopping_cart';
 
     /**
+     * Activate discount coupon event
+     */
+    const ACTIVATE_DISCOUNT_COUPON = 'activate_discount_coupon';
+
+    /**
+     * Deactivate discount coupon event
+     */
+    const DEACTIVATE_DISCOUNT_COUPON = 'deactivate_discount_coupon';
+
+    /**
+     * Fire deactivate discount coupon event
+     *
+     * @param string $couponCode
+     * @return void
+     */
+    public static function fireDeactivateDiscountCouponEvent($couponCode)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Discount coupon deactivated by guest'
+            : 'Event - Discount coupon deactivated by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$couponCode]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $couponCode];
+
+        self::fireEvent(self::DEACTIVATE_DISCOUNT_COUPON, 
+                $couponCode, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire activate discount coupon event
+     *
+     * @param string $couponCode
+     * @return void
+     */
+    public static function fireActivateDiscountCouponEvent($couponCode)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Discount coupon activated by guest'
+            : 'Event - Discount coupon activated by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$couponCode]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $couponCode];
+
+        self::fireEvent(self::ACTIVATE_DISCOUNT_COUPON, 
+                $couponCode, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire delete item from shopping cart event
      *
      * @param integer $itemId

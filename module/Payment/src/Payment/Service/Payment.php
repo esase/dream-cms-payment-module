@@ -44,6 +44,18 @@ class Payment
     protected static $discountCouponInfo = null;
 
     /**
+     * Set a discount coupon ID
+     *
+     * @param integer $couponId
+     * @return void
+     */
+    public static function setDiscountCouponId($couponId)
+    {
+        $paymentSession = new SessionContainer('payment');
+        $paymentSession->discountCouponId = $couponId;
+    }
+
+    /**
      * Get discount coupon info
      *
      * @return array

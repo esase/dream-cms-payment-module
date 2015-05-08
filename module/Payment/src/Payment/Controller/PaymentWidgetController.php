@@ -2,6 +2,8 @@
 
 namespace Payment\Controller;
 
+use Payment\Event\PaymentEvent;
+use Payment\Service\Payment as PaymentService;
 use Payment\Handler\PaymentInterfaceHandler;
 use Application\Controller\ApplicationAbstractBaseController;
 use Payment\Model\PaymentBase as PaymentBaseModel;
@@ -27,6 +29,73 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         }
 
         return $this->model;
+    }
+
+    /**
+     * Deactivate current discount coupon
+     */
+    public function ajaxDeactivateDiscountCouponAction()
+    {
+        $request = $this->getRequest();
+
+        if ($request->isPost()) {
+            if (null != ($discountCouponInfo = PaymentService::getDiscountCouponInfo())) {
+                PaymentService::setDiscountCouponId(null);
+
+                // fire the deactivate discount coupon event
+                PaymentEvent::fireDeactivateDiscountCouponEvent($discountCouponInfo['slug']);
+
+                $this->flashMessenger()
+                    ->setNamespace('success')
+                    ->addMessage($this->getTranslator()->translate('The coupon code has been deactivated'));
+            }
+        }
+
+        return $this->getResponse();
+    }
+
+    /**
+     * Activate a discount coupon
+     */
+    public function ajaxActivateDiscountCouponAction()
+    {
+        $refreshPage = false;
+
+        $discountForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Payment\Form\PaymentDiscountForm')
+            ->setModel($this->getModel());
+
+        $request = $this->getRequest();
+
+        if ($request->isPost()) {
+            $discountForm->getForm()->setData($request->getPost(), false);
+
+            if ($discountForm->getForm()->isValid()) {
+                // activate a discount coupon
+                $couponCode = $discountForm->getForm()->getData()['coupon'];
+
+                // save the activated discount coupon's ID in sessions
+                PaymentService::setDiscountCouponId($this->
+                        getModel()->getCouponInfo($couponCode, 'slug')['id']);
+
+                // fire the activate discount coupon event
+                PaymentEvent::fireActivateDiscountCouponEvent($couponCode);
+
+                $this->flashMessenger()
+                    ->setNamespace('success')
+                    ->addMessage($this->getTranslator()->translate('The coupon code has been activated'));
+
+                $refreshPage = true;
+            }
+        }
+
+        $view = new ViewModel([
+            'discount_form' => $discountForm->getForm(),
+            'refresh_page' => $refreshPage
+        ]);
+
+        return $view;
     }
 
     /**

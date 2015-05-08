@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-05-06 10:21+0600\n"
+"PO-Revision-Date: 2015-05-08 10:42+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -263,6 +263,9 @@ msgstr "Item has been edited"
 
 msgid "Edit the item"
 msgstr "Edit the item"
+
+msgid "The selected item has been deleted"
+msgstr "The selected item has been deleted"
 
 msgid "Selected items have been deleted"
 msgstr "Selected items have been deleted"

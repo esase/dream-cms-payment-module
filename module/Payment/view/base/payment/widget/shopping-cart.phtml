@@ -1,7 +1,33 @@
+<?php $this->declareVars('regularActions', 'currentPageUrl') ?>
+<?php $this->currentPage = $this->pageUrl('shopping-cart') ?>
+
+<?php
+    // generate list of regular actions
+    if ($this->paymentshoppingCart()->getItemsCount()) {
+        $this->regularActions = [
+            [
+                'name' => !$this->paymentShoppingCart()->getCurrentDiscount()
+                    ? $this->translate('Enter a discount code')
+                    : $this->translate('Deactivate the discount code'),
+
+                'js' => !$this->paymentShoppingCart()->getCurrentDiscount() 
+                    ? 'payment.getDiscountCouponForm()' 
+                    : 'payment.deactivateDiscountCoupon()'
+            ],
+            /*[
+                'name' => $this->translate('Checkout'),
+                'page_name' => 'home',
+                'action' => 'checkout',
+                'check_acl' => true,
+                'acl_resource' => 'qqq'
+            ]*/
+        ];
+    }
+?>
 
 <!-- render a data grid -->
 <?php echo $this->partial('partial/data-grid', [
-    'page_name' => $this->pageUrl('shopping-cart'),
+    'page_name' => $this->currentPage,
     'order_by' => $this->order_by,
     'order_type' => $this->order_type,
     'per_page' => $this->per_page,
@@ -31,46 +57,54 @@
         [
             'title' => $this->translate('Total price'),
             'order_name' => 'total'
-        ],
-        [
-            'title' => $this->translate('Status')
         ]
     ],
     'paginator' => $this->paginator,
     'skipped_fields' => [
-        'object_id',
-        'view_controller',
-        'view_action',
-        'countable',
-        'must_login',
-        'slug',
-        'available',
-        'multi_costs',
-        'handler',
-        'module_state'
     ],
     'helpers' => array(
         //'title' => 'paymentItemLink',
-        'active' => 'paymentItemStatus',
         'cost' => 'paymentProcessCost',
         'discount' => 'paymentProcessCost',
         'total' => 'paymentProcessCost'
     ),
     'helpers_set_array' => [
-        'active' => true,
-        'title' => true
     ],
     'helpers_options' => [
     ],
     'actions' => [
+        'regular_actions' => $this->regularActions,
+         'multiple_actions' => [
+            [
+                'name' => $this->translate('Delete selected'),
+                'page_name' => $this->currentPage,
+                'check_acl' => false,
+                'confirm' => $this->translate('Selected items will be deleted. Are you sure?'),
+                'queries' => [
+                    'action' => 'delete'
+                ]
+            ]
+        ]
     ],
     'actions_options' => [
         'action_identity' => 'id',
         'form_name' => 'shopping-cart',
         'multiple_actions' => [
-            'items_name' => 'items[]'
+            'items_name' => 'items[]',
         ]
     ],
     'actions_extra_check' => [
     ]
 ]) ?>
+
+<?php if ($this->paymentShoppingCart()->getItemsCount()) : ?>
+    <div id="shopping-cart-price-wrapper">
+        <p>
+            <b><?php echo $this->translate('Total price') ?>:</b> 
+            <?php echo $this->escapeHtml($this->paymentProcessCost($this->paymentShoppingCart()->getItemsDiscountedAmount(), true)) ?>
+            <?php if ($this->paymentShoppingCart()->getCurrentDiscount()) : ?>
+                - <?php echo $this->translate('without discount') ?>: <?php echo $this->escapeHtml($this->paymentProcessCost($this->paymentShoppingCart()->getItemsAmount())) ?>
+            <?php endif ?>
+        </p>
+    </div>
+<?php endif ?>

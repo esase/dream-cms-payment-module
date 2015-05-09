@@ -1,9 +1,11 @@
-<?php $this->declareVars('regularActions', 'currentPageUrl') ?>
+<?php use Payment\Model\PaymentBase as PaymentBaseModel ?>
+<?php $this->declareVars('regularActions', 'currentPageUrl', 'checkoutPageUrl') ?>
 <?php $this->currentPage = $this->pageUrl('shopping-cart') ?>
 
 <?php
     // generate list of regular actions
     if ($this->paymentshoppingCart()->getItemsCount()) {
+        $this->regularActions = new ArrayObject;
         $this->regularActions = [
             [
                 'name' => !$this->paymentShoppingCart()->getCurrentDiscount()
@@ -13,15 +15,20 @@
                 'js' => !$this->paymentShoppingCart()->getCurrentDiscount() 
                     ? 'payment.getDiscountCouponForm()' 
                     : 'payment.deactivateDiscountCoupon()'
-            ],
-            /*[
-                'name' => $this->translate('Checkout'),
-                'page_name' => 'home',
-                'action' => 'checkout',
-                'check_acl' => true,
-                'acl_resource' => 'qqq'
-            ]*/
+            ]
         ];
+
+        $this->checkoutPageUrl = $this->pageUrl('checkout');
+
+        if (false !== $this->checkoutPageUrl) {
+            $this->regularActions = array_merge($this->regularActions, [
+                [
+                    'name' => $this->translate('Checkout'),
+                    'page_name' => $this->checkoutPageUrl,
+                    'check_acl' => false
+                ]
+            ]);
+        }
     }
 ?>
 
@@ -61,20 +68,27 @@
     ],
     'paginator' => $this->paginator,
     'skipped_fields' => [
+        'object_id',
+        'countable',
+        'multi_costs',
+        'handler',
+        'page_name',
+        'slug'
     ],
     'helpers' => array(
-        //'title' => 'paymentItemLink',
+        'title' => 'paymentItemLink',
         'cost' => 'paymentProcessCost',
         'discount' => 'paymentProcessCost',
         'total' => 'paymentProcessCost'
     ),
     'helpers_set_array' => [
+        'title' => true
     ],
     'helpers_options' => [
     ],
     'actions' => [
         'regular_actions' => $this->regularActions,
-         'multiple_actions' => [
+        'multiple_actions' => [
             [
                 'name' => $this->translate('Delete selected'),
                 'page_name' => $this->currentPage,
@@ -83,6 +97,15 @@
                 'queries' => [
                     'action' => 'delete'
                 ]
+            ]
+        ],
+        'single_actions' => [
+            [
+                'name' => $this->translate('Edit'),
+                'js' => 'payment.getEditItemForm(\'__value__\')',
+                'check_acl' => false,
+                'action' => 'edit-item',
+                'image' => $this->layoutAsset('icon/edit_action.png', 'image')
             ]
         ]
     ],
@@ -94,6 +117,30 @@
         ]
     ],
     'actions_extra_check' => [
+        'single_actions' => [
+            'edit-item' => [
+                [
+                    'function' => function($data) use ($paymentHandlerManager) {
+                        $paymentHandler = $paymentHandlerManager->getInstance($data['handler']);
+
+                        if ($data['countable'] == PaymentBaseModel::MODULE_COUNTABLE
+                                || $data['multi_costs'] == PaymentBaseModel::MODULE_MULTI_COSTS) {
+
+                            return true;
+                        }
+
+                        // check a discount params
+                        if ((float) $data['discount']
+                                || $paymentHandler->getDiscount($data['object_id'])) {
+
+                            return true;
+                        }
+
+                        return false;
+                    }
+                ]
+            ]
+        ]
     ]
 ]) ?>
 

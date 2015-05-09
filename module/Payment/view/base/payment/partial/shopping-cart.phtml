@@ -18,7 +18,7 @@
             <a href="<?php echo  $this->url('page', ['page_name' => $this->pageUrl('shopping-cart')], ['force_canonical' => true]) ?>">
                 <?php echo $this->translate('View the shopping cart') ?>
             </a> |
-            <a rel="nofollow" href="javascript:void(0)" onclick="payment.cleanShoppingCart('true')">
+            <a rel="nofollow" href="javascript:void(0)" onclick="payment.cleanShoppingCart(<?php if (true === $this->is_shopping_cart_page): ?>true<?php endif ?>)">
                 <?php echo $this->translate('Clean the shopping cart') ?>
             </a>
         <?php else: ?>

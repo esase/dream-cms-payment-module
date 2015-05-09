@@ -51,7 +51,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('add_item_to_shopping_cart', @moduleId, 'Event - Adding items to the shopping cart'),
 ('delete_item_from_shopping_cart', @moduleId, 'Event - Deleting items from the shopping cart'),
 ('activate_discount_coupon', @moduleId, 'Event - Activating discount coupons'),
-('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons');
+('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons'),
+('edit_item_into_shopping_cart', @moduleId, 'Event - Editing items into the shopping cart');
 
 -- application settings
 
@@ -249,11 +250,19 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 -- system pages and widgets
 
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
+('checkout', 'Checkout', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+SET @checkoutPageId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
+(@checkoutPageId, 1);
+
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
 ('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL);
 SET @shoppingCartPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
-(@shoppingCartPageId, 1);
+(@shoppingCartPageId, 1),
+(@shoppingCartPageId, @checkoutPageId);
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
 ('paymentShoppingCartWidget', @moduleId, 'public', 'Shopping cart', NULL, 1, @shoppingCartPageId);
@@ -285,11 +294,9 @@ CREATE TABLE IF NOT EXISTS `payment_module` (
     `module` SMALLINT(5) UNSIGNED NOT NULL,
     `update_event` VARCHAR(50) NOT NULL,
     `delete_event` VARCHAR(50) NOT NULL,
-    `view_controller` VARCHAR(50) NOT NULL,
-    `view_action` VARCHAR(50) NOT NULL,
-    `view_check` VARCHAR(255) NOT NULL,
-    `countable` TINYINT(1) NOT NULL,
-    `multi_costs` TINYINT(1) NOT NULL,
+    `page_name` VARCHAR(50) NOT NULL,
+    `countable` TINYINT(1) UNSIGNED NOT NULL,
+    `multi_costs` TINYINT(1) UNSIGNED NOT NULL,
     `must_login` TINYINT(1) UNSIGNED NOT NULL,
     `handler` VARCHAR(100) NOT NULL,
     PRIMARY KEY (`module`),

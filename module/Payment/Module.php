@@ -74,7 +74,8 @@ class Module implements ConsoleUsageProviderInterface
                 'paymentItemStatus' => 'Payment\View\Helper\PaymentItemStatus',
                 'paymentCurrency' => 'Payment\View\Helper\PaymentCurrency',
                 'paymentShoppingCart' => 'Payment\View\Helper\PaymentShoppingCart',
-                'paymentProcessCost' => 'Payment\View\Helper\PaymentProcessCost'
+                'paymentProcessCost' => 'Payment\View\Helper\PaymentProcessCost',
+                'paymentItemLink' => 'Payment\View\Helper\PaymentItemLink'
             ],
             'factories' => [
             ]

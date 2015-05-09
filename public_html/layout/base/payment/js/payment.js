@@ -178,7 +178,7 @@ Payment = function()
      */
     this.getEditItemForm = function(itemId)
     {
-        _showPopupShoppingCart('ajax-edit-shopping-cart-item/' + parseInt(itemId), {}, 'get');
+        _showPopupShoppingCart('ajax-edit-shopping-cart-item/?id=' + parseInt(itemId), {}, 'get');
     }
 
     /**
@@ -193,7 +193,7 @@ Payment = function()
 
         // remove previously loaded popup
         $popup.on('hidden.bs.modal', function (e) {
-            _showPopupShoppingCart('ajax-edit-shopping-cart-item/' + parseInt(itemId), $popup.find('form:first').serialize());
+            _showPopupShoppingCart('ajax-edit-shopping-cart-item/?id=' + parseInt(itemId), $popup.find('form:first').serialize());
         }).modal('hide');
     }
 
@@ -232,7 +232,7 @@ Payment = function()
 
         // update the shopping cart
         $.post(serverUrl + '/ajax-clean-shopping-cart', function(data) {
-            typeof isShoppingCartPage != 'undefined' && true == isShoppingCartPage
+            typeof isShoppingCartPage != 'undefined' && true === isShoppingCartPage
                 ? self.refreshPage()
                 : _updateShoppingCart(data);
         });

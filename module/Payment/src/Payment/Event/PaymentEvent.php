@@ -75,6 +75,32 @@ class PaymentEvent extends ApplicationAbstractEvent
     const DEACTIVATE_DISCOUNT_COUPON = 'deactivate_discount_coupon';
 
     /**
+     * Edit item into shopping cart event
+     */
+    const EDIT_ITEM_INTO_SHOPPING_CART = 'edit_item_into_shopping_cart';
+
+    /**
+     * Fire edit item into shopping cart event
+     *
+     * @param integer $itemId
+     * @return void
+     */
+    public static function fireEditItemIntoShoppingCartEvent($itemId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Item edited into the shopping cart by guest'
+            : 'Event - Item edited into the shopping cart by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$itemId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $itemId];
+
+        self::fireEvent(self::EDIT_ITEM_INTO_SHOPPING_CART, 
+                $itemId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire deactivate discount coupon event
      *
      * @param string $couponCode

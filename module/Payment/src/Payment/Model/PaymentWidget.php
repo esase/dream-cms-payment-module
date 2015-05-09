@@ -15,6 +15,44 @@ use Exception;
 class PaymentWidget extends PaymentBase
 {
     /**
+     * Update the shopping cart's item
+     *
+     * @param integer $id
+     * @param array $itemInfo
+     * @return boolean|string
+     */
+    public function updateShoppingCartItem($id, array $itemInfo)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            $update = $this->update()
+                ->table('payment_shopping_cart')
+                ->set($itemInfo)
+                ->where([
+                    'id' => $id,
+                    'shopping_cart_id' => $this->getShoppingCartId(),
+                    'language' => $this->getCurrentLanguage()
+                ]);
+
+            $statement = $this->prepareStatementForSqlObject($update);
+            $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        // fire the edit item into shopping cart event
+        PaymentEvent::fireEditItemIntoShoppingCartEvent($id);
+        return true;
+    }
+
+    /**
      * Get the shopping cart's item info
      *
      * @param integer $itemId
@@ -95,16 +133,23 @@ class PaymentWidget extends PaymentBase
         $select->from(['a' => 'payment_shopping_cart'])
             ->columns([
                 'id',
+                'object_id',
                 'title',
                 'cost',
                 'discount',
                 'count',
-                'total' => new Expression('cost * count - discount')
+                'total' => new Expression('cost * count - discount'),
+                'slug'
             ])
             ->join(
                 ['b' => 'payment_module'],
                 'a.module = b.module',
-                []
+                [
+                    'countable',
+                    'multi_costs',
+                    'handler',
+                    'page_name'
+                ]
             )
             ->join(
                 ['c' => 'application_module'],

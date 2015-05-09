@@ -32,6 +32,112 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     }
 
     /**
+     * Edit shopping cart's item
+     */
+    public function ajaxEditShoppingCartItemAction()
+    {
+        $itemId = $this->getRequest()->getQuery('id', -1);
+
+        // get an item's info
+        if (null == ($itemInfo = $this->
+                getModel()->getShoppingCartItemInfo($itemId, true))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        // get the payment handler
+        $paymentHandler = $this->getServiceLocator()
+            ->get('Payment\Handler\PaymentHandlerManager')
+            ->getInstance($itemInfo['handler']);
+
+        // get the item's additional info
+        $extraItemInfo = $paymentHandler->getItemInfo($itemInfo['object_id']);
+
+        // extra checks
+        if ($itemInfo['countable'] == PaymentBaseModel::MODULE_COUNTABLE
+                || $itemInfo['multi_costs'] == PaymentBaseModel::MODULE_MULTI_COSTS
+                || (float) $itemInfo['discount']
+                || $paymentHandler->getDiscount($itemInfo['object_id'])) {
+
+            $refreshPage = false;
+
+            // get a form instance
+            $shoppingCartForm = $this->getServiceLocator()
+                ->get('Application\Form\FormManager')
+                ->getInstance('Payment\Form\PaymentShoppingCart')
+                ->hideCountField($itemInfo['countable'] != PaymentBaseModel::MODULE_COUNTABLE)
+                ->setDiscount(((float) $itemInfo['discount'] ? (float) $itemInfo['discount'] : (float) $extraItemInfo['discount']))
+                ->setCountLimit((PaymentBaseModel::MODULE_COUNTABLE == $itemInfo['countable'] ? $extraItemInfo['count'] : 0));
+
+            if (PaymentBaseModel::MODULE_MULTI_COSTS == $itemInfo['multi_costs']) {
+                $shoppingCartForm->setTariffs($extraItemInfo['cost']);
+            }
+
+            // fill the form with default values
+            $defaultFormValues = array_merge($itemInfo, [
+                'discount' => (float) $itemInfo['discount'] ? 1 : 0
+            ]);
+
+            $shoppingCartForm->getForm()->setData($defaultFormValues);
+
+            $request = $this->getRequest();
+            $shoppingCartForm->getForm()->setData($request->getPost(), false);
+
+            // validate the form
+            if ($request->isPost()) {
+                if ($shoppingCartForm->getForm()->isValid()) {
+                    // get the form's data
+                    $formData = $shoppingCartForm->getForm()->getData();
+
+                    $newItemInfo = array(
+                        'cost' => !empty($formData['cost']) ? $formData['cost'] : $itemInfo['cost'],
+                        'count' => PaymentBaseModel::MODULE_COUNTABLE == $itemInfo['countable'] ? $formData['count'] : 1,
+                        'discount'  => !empty($formData['discount'])
+                            ? ((float) $itemInfo['discount'] ? (float) $itemInfo['discount'] : (float) $extraItemInfo['discount'])
+                            : 0
+                    );
+
+                    // update the item into the shopping cart
+                    if (true === ($result = $this->
+                            getModel()->updateShoppingCartItem($itemInfo['id'], $newItemInfo))) {
+
+                        $refreshPage = true;
+
+                        // return a discount back
+                        if ((float) $itemInfo['discount'] && empty($formData['discount'])) {
+                            // get the payment handler
+                            $this->getServiceLocator()
+                                ->get('Payment\Handler\PaymentHandlerManager')
+                                ->getInstance($itemInfo['handler'])
+                                ->returnBackDiscount($itemInfo['object_id'], (float) $itemInfo['discount']);
+                        }
+
+                        $this->flashMessenger()
+                            ->setNamespace('success')
+                            ->addMessage($this->getTranslator()->translate('Item has been edited'));
+                    }
+                    else {
+                        $this->flashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->getTranslator()->translate('Error occurred'));
+                    }
+                }
+            }
+
+            $view = new ViewModel([
+                'refresh_page' => $refreshPage,
+                'id' => $itemInfo['id'],
+                'shopping_cart_form' => $shoppingCartForm->getForm(),
+            ]);
+
+            return $view;
+        }
+        else {
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+    }
+
+    /**
      * Deactivate current discount coupon
      */
     public function ajaxDeactivateDiscountCouponAction()

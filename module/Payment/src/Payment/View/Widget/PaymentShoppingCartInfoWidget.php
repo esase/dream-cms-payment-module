@@ -2,9 +2,15 @@
 namespace Payment\View\Widget;
 
 use Page\View\Widget\PageAbstractWidget;
+use Page\Service\Page as PageService;
 
 class PaymentShoppingCartInfoWidget extends PageAbstractWidget
 {
+    /**
+     * Shopping cart page
+     */
+    const SHOPPING_CART_PAGE = 'shopping-cart';
+
    /**
      * Get widget content
      *
@@ -16,6 +22,18 @@ class PaymentShoppingCartInfoWidget extends PageAbstractWidget
             return false;
         }
 
-        return $this->getView()->partial('payment/widget/shopping-cart-info');
+        return $this->getView()->partial('payment/widget/shopping-cart-info', [
+            'is_shopping_cart_page' => $this->isShoppingCartPage()
+        ]);
+    }
+
+    /**
+     * Is shoping cart page
+     * 
+     * @return boolean
+     */
+    protected function isShoppingCartPage()
+    {
+        return self::SHOPPING_CART_PAGE == PageService::getCurrentPage()['slug'];
     }
 }

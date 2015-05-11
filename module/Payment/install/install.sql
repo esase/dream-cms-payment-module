@@ -52,7 +52,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('delete_item_from_shopping_cart', @moduleId, 'Event - Deleting items from the shopping cart'),
 ('activate_discount_coupon', @moduleId, 'Event - Activating discount coupons'),
 ('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons'),
-('edit_item_into_shopping_cart', @moduleId, 'Event - Editing items into the shopping cart');
+('edit_item_into_shopping_cart', @moduleId, 'Event - Editing items into the shopping cart'),
+('add_payment_transaction', @moduleId, 'Event - Adding payment transactions');
 
 -- application settings
 
@@ -256,6 +257,16 @@ SET @checkoutPageId = (SELECT LAST_INSERT_ID());
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
 (@checkoutPageId, 1);
 
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentCheckoutWidget', @moduleId, 'public', 'Checkout', NULL, 1, @checkoutPageId);
+SET @checkoutWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
+(@checkoutPageId,  @checkoutWidgetId,  1);
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@checkoutPageId,  @checkoutWidgetId);
+
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
 ('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL);
 SET @shoppingCartPageId = (SELECT LAST_INSERT_ID());
@@ -360,7 +371,7 @@ CREATE TABLE IF NOT EXISTS `payment_discount_cupon` (
 
 CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `slug` VARCHAR(50) NOT NULL,
+    `slug` VARCHAR(50) DEFAULT NULL,
     `user_id` INT(10) UNSIGNED DEFAULT NULL,
     `first_name` VARCHAR(100) NOT NULL,
     `last_name` VARCHAR(100) NOT NULL,
@@ -368,13 +379,13 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     `phone` VARCHAR(50) NOT NULL,
     `address` VARCHAR(100) NOT NULL,
     `date` INT(10) UNSIGNED NOT NULL,
-    `paid` TINYINT(1) NOT NULL,
+    `paid` TINYINT(1) UNSIGNED NOT NULL,
     `currency` TINYINT(3) UNSIGNED NOT NULL,
     `payment_type` TINYINT(3) UNSIGNED DEFAULT NULL,
-    `comments` text NOT NULL,
+    `comments` text DEFAULT NULL,
     `discount_cupon` SMALLINT(5) UNSIGNED DEFAULT NULL,
-    `amount` DECIMAL(10,2) NOT NULL DEFAULT '0',
-    `user_hidden` TINYINT(1) NOT NULL,
+    `amount` DECIMAL(10,2) NOT NULL,
+    `user_hidden` TINYINT(1) UNSIGNED NOT NULL,
     `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `slug` (`slug`),
@@ -405,20 +416,14 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     `module` SMALLINT(5) UNSIGNED NOT NULL,
     `title` VARCHAR(100) NOT NULL,
     `slug` VARCHAR(100) NOT NULL,
-    `cost` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
-    `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
-    `count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0,
-    `active` TINYINT(1) NOT NULL DEFAULT 1,
-    `available` TINYINT(1) NOT NULL DEFAULT 1,
-    `language` CHAR(2) NOT NULL,
+    `cost` DECIMAL(10,2) UNSIGNED NOT NULL,
+    `discount` DECIMAL(10,2) UNSIGNED NOT NULL,
+    `count` SMALLINT(5) UNSIGNED NOT NULL,
     PRIMARY KEY (`object_id`, `module`, `transaction_id`),
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (`module`) REFERENCES `payment_module`(`module`)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

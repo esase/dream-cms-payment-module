@@ -31,6 +31,11 @@ class PaymentBase extends ApplicationAbstractBase
     const MODULE_MULTI_COSTS = 1;
 
     /**
+     * Module must login flag
+     */
+    const MODULE_MUST_LOGIN = 1;
+
+    /**
      * Transaction paid
      */
     const TRANSACTION_PAID = 1;
@@ -84,6 +89,21 @@ class PaymentBase extends ApplicationAbstractBase
      * Shopping cart id length
      */
     const SHOPPING_CART_ID_LENGTH = 50;
+
+    /**
+     * Transaction user hidden
+     */ 
+    const TRANSACTION_USER_HIDDEN = 1;
+
+    /**
+     * Transaction user not hidden
+     */ 
+    const TRANSACTION_USER_NOT_HIDDEN = 0;
+
+    /**
+     * Transaction min slug length
+     */
+    const TRANSACTION_MIN_SLUG_LENGTH = 20;
 
     /**
      * Save shopping cart currency

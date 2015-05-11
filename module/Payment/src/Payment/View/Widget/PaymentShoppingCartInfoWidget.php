@@ -1,10 +1,10 @@
 <?php
+
 namespace Payment\View\Widget;
 
-use Page\View\Widget\PageAbstractWidget;
 use Page\Service\Page as PageService;
 
-class PaymentShoppingCartInfoWidget extends PageAbstractWidget
+class PaymentShoppingCartInfoWidget extends PaymentAbstractWidget
 {
     /**
      * Shopping cart page
@@ -34,6 +34,7 @@ class PaymentShoppingCartInfoWidget extends PageAbstractWidget
      */
     protected function isShoppingCartPage()
     {
-        return self::SHOPPING_CART_PAGE == PageService::getCurrentPage()['slug'];
+        return !empty(PageService::getCurrentPage()['slug'])
+                && self::SHOPPING_CART_PAGE == PageService::getCurrentPage()['slug'];
     }
 }

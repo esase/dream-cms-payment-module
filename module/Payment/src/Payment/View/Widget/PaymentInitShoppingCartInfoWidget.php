@@ -1,9 +1,8 @@
 <?php
+
 namespace Payment\View\Widget;
 
-use Page\View\Widget\PageAbstractWidget;
-
-class PaymentInitShoppingCartInfoWidget extends PageAbstractWidget
+class PaymentInitShoppingCartInfoWidget extends PaymentAbstractWidget
 {
     /**
      * Include js and css files

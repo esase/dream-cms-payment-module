@@ -80,6 +80,11 @@ class PaymentEvent extends ApplicationAbstractEvent
     const EDIT_ITEM_INTO_SHOPPING_CART = 'edit_item_into_shopping_cart';
 
     /**
+     * Add payment transaction event
+     */
+    const ADD_PAYMENT_TRANSACTION = 'add_payment_transaction';
+
+    /**
      * Fire edit item into shopping cart event
      *
      * @param integer $itemId
@@ -98,6 +103,51 @@ class PaymentEvent extends ApplicationAbstractEvent
 
         self::fireEvent(self::EDIT_ITEM_INTO_SHOPPING_CART, 
                 $itemId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+    
+    /**
+     * Fire add payment transaction event
+     *
+     * @param string $transactionId
+     * @param array $userInfo
+     *      string first_name
+     *      string last_name
+     *      string email
+     * @return void
+     */
+    public static function fireAddPaymentTransactionEvent($transactionId, $userInfo)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Payment transaction added by guest'
+            : 'Event - Payment transaction added by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$transactionId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $transactionId];
+
+        self::fireEvent(self::ADD_PAYMENT_TRANSACTION, 
+                $transactionId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+
+        // send an email notification about register the new transaction
+        if ((int) ApplicationSettingService::getSetting('payment_transaction_add')) {
+            ApplicationEmailNotificationUtility::sendNotification(ApplicationSettingService::getSetting('application_site_email'),
+                ApplicationSettingService::getSetting('payment_transaction_add_title', LocalizationService::getDefaultLocalization()['language']),
+                ApplicationSettingService::getSetting('payment_transaction_add_message', LocalizationService::getDefaultLocalization()['language']), [
+                    'find' => [
+                        'FirstName',
+                        'LastName',
+                        'Email',
+                        'Id'
+                    ],
+                    'replace' => [
+                        $userInfo['first_name'],
+                        $userInfo['last_name'],
+                        $userInfo['email'],
+                        $transactionId
+                    ]
+                ]);
+        }
     }
 
     /**

@@ -23,6 +23,8 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
             ]);
         }
 
+        $homePageUrl = $this->getView()->pageUrl('home');
+
         // check additional params
         if (UserIdentityService::isGuest()) {
             foreach ($shoppingCartItems as $item) {
@@ -43,7 +45,7 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
                     }
 
                     // redirect to home page
-                    return $this->redirectTo(['page_name' => $this->getView()->pageUrl('home')]);
+                    return $this->redirectTo(['page_name' => $homePageUrl]);
                 }
             }
         }
@@ -95,39 +97,57 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
                 // add a new transaction
                 $result = $this->getModel()->addTransaction($userId, $formData, $shoppingCartItems, $amount);
 
-                if (!is_numeric($result)) {
+                if (is_numeric($result)) {
+                    // clear the shopping cart items
+                    if (null != ($items = $this->getModel()->getAllShoppingCartItems(false))) {
+                        // delete all items
+                        foreach ($items as $itemInfo) {
+                            $this->getModel()->deleteFromShoppingCart($itemInfo['id']);
+                        }
+                    }
+
                     // get created transaction info
                     $transactionInfo = $this->getModel()->getTransactionInfo($result);
 
                     // redirect to the buying page
                     if ($transactionPayable) {
                         // TODO: Pay page ???
-                        return $this->redirectTo('payments', 'buy', array(
+                        echo 'redirect to the buy page';
+                        exit;
+                        /*return $this->redirectTo('payments', 'buy', array(
                             'slug'  => $transactionInfo['slug'],
                             'extra' => $transactionInfo['payment_name']
-                        ));
+                        ));*/
                     }
                     else {
-                        // activate the transaction and redirect to success page
-                        if (true == ($result = $this->activateTransaction($transactionInfo))) {
-                            // SUCCESS PAGE???
-                            return $this->redirectTo('payments', 'success');
+                        // activate the transaction and redirect to the success page
+                        if (true === ($result = 
+                                $this->getModel()->activateTransaction($transactionInfo))) {
+
+                            $successPageUrl = $this->getView()->pageUrl('successful-payment');
+
+                            if (false !== $successPageUrl) {
+                                return $this->redirectTo(['page_name' => $successPageUrl]);
+                            }
+
+                            $this->getFlashMessenger()
+                                ->setNamespace('error')
+                                ->addMessage($this->translate('Sorry you cannot see the payment success page'));
                         }
-
-                        $this->getFlashMessenger()
-                            ->setNamespace('error')
-                            ->addMessage($this->getTranslator()->translate('Transaction activation error'));
-
-                        return $this->redirectTo('payments', 'shopping-cart');
+                        else {
+                            $this->getFlashMessenger()
+                                ->setNamespace('error')
+                                ->addMessage($this->translate('Transaction activation error'));
+                        }
                     }
                 }
                 else {
                     $this->getFlashMessenger()
                         ->setNamespace('error')
                         ->addMessage($this->translate('Error occurred'));
-
-                    $this->reloadPage();    
                 }
+
+                return $this->reloadPage();
             }
         }
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-05-08 10:42+0600\n"
+"PO-Revision-Date: 2015-05-12 16:08+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,18 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Payment transaction status"
+msgstr "Payment transaction status"
+
+msgid "Sorry you cannot see the payment success page"
+msgstr "Sorry you cannot see the payment success page"
+
+msgid "Successful payment"
+msgstr "Successful payment"
+
+msgid "Failed payment"
+msgstr "Failed payment"
 
 msgid "New coupon"
 msgstr "New coupon"
@@ -200,9 +212,6 @@ msgstr "No available payment types. Please try again later"
 
 msgid "Enable cash"
 msgstr "Enable cash"
-
-msgid "Payment transaction status"
-msgstr "Payment transaction status"
 
 msgid "Unsuccessful payment transaction's message"
 msgstr "Unsuccessful payment transaction's message"

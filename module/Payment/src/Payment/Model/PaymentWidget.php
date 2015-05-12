@@ -125,14 +125,6 @@ class PaymentWidget extends PaymentBase
                 $statement->execute();
             }
 
-            // clear the shopping cart items
-            if (null != ($items = $this->getAllShoppingCartItems(false))) {
-                // delete all items
-                foreach ($items as $itemInfo) {
-                    $this->deleteFromShoppingCart($itemInfo['id']);
-                }
-            }
-
             $this->adapter->getDriver()->getConnection()->commit();
         }
         catch (Exception $e) {

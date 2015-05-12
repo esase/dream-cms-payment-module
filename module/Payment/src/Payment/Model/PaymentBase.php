@@ -380,7 +380,7 @@ class PaymentBase extends ApplicationAbstractBase
                 foreach ($activeTransactionItems as $itemInfo) {
                     // get the payment handler
                     $handler = $this->serviceLocator
-                        ->get('Payment\Handler\HandlerManager')
+                        ->get('Payment\Handler\PaymentHandlerManager')
                         ->getInstance($itemInfo['handler']);
 
                     // set an item as paid
@@ -404,11 +404,9 @@ class PaymentBase extends ApplicationAbstractBase
     /**
      * Get all transaction items
      *
-     * @param integer $transactionId
-     * @param boolean $onlyActive
      * @return array
      */
-    public function getAllTransactionItems($transactionId, $onlyActive = true)
+    public function getAllTransactionItems($transactionId)
     {
         $select = $this->select();
         $select->from(['a' => 'payment_transaction_item'])
@@ -434,13 +432,6 @@ class PaymentBase extends ApplicationAbstractBase
             ->where([
                 'transaction_id' => $transactionId
             ]);
-
-        if ($onlyActive) {
-            $select->where([
-                'a.active' => self::ITEM_ACTIVE,
-                'a.available' => self::ITEM_AVAILABLE             
-            ]);
-        }
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"payment\" module\n"
 "POT-Creation-Date: 2013-07-22 00:12+0600\n"
-"PO-Revision-Date: 2015-05-08 10:42+0600\n"
+"PO-Revision-Date: 2015-05-12 16:08+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -15,6 +15,18 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Payment transaction status"
+msgstr "Статус платежной операции"
+
+msgid "Sorry you cannot see the payment success page"
+msgstr "Извините вы не можете увидеть страницу успешной оплаты"
+
+msgid "Successful payment"
+msgstr "Успешная оплата"
+
+msgid "Failed payment"
+msgstr "Неудавшиеся оплата"
 
 msgid "New coupon"
 msgstr "Новый купон"
@@ -201,9 +213,6 @@ msgstr "Нет доступных типов платежей. Пожалуйс�
 
 msgid "Enable cash"
 msgstr "Включить наличные"
-
-msgid "Payment transaction status"
-msgstr "Статус платежной операции"
 
 msgid "Unsuccessful payment transaction's message"
 msgstr "Сообщение о неудачной платежной операции"

@@ -251,11 +251,47 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 -- system pages and widgets
 
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
+('successful-payment', 'Successful payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+SET @paymentSuccessPageId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
+(@paymentSuccessPageId, 1);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`, `allow_cache`) VALUES
+('paymentSuccessWidget', @moduleId, 'public', 'Payment transaction status', NULL, 1, @paymentSuccessPageId, 1);
+SET @paymentSuccessPaymentWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
+(@paymentSuccessPageId,  @paymentSuccessPaymentWidgetId,  1);
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@paymentSuccessPageId,  @paymentSuccessPaymentWidgetId);
+
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
+('failed-payment', 'Failed payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+SET @paymentErrorPageId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
+(@paymentErrorPageId, 1);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`, `allow_cache`) VALUES
+('paymentErrorWidget', @moduleId, 'public', 'Payment transaction status', NULL, 1, @paymentErrorPageId, 1);
+SET @paymentErrorPaymentWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
+(@paymentErrorPageId,  @paymentErrorPaymentWidgetId,  1);
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@paymentErrorPageId,  @paymentErrorPaymentWidgetId);
+
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
 ('checkout', 'Checkout', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
 SET @checkoutPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
-(@checkoutPageId, 1);
+(@checkoutPageId, 1),
+(@checkoutPageId, @paymentSuccessPageId),
+(@checkoutPageId, @paymentErrorPageId);
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
 ('paymentCheckoutWidget', @moduleId, 'public', 'Checkout', NULL, 1, @checkoutPageId);

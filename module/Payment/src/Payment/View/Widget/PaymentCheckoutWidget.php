@@ -23,8 +23,6 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
             ]);
         }
 
-        $homePageUrl = $this->getView()->pageUrl('home');
-
         // check additional params
         if (UserIdentityService::isGuest()) {
             foreach ($shoppingCartItems as $item) {
@@ -45,7 +43,7 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
                     }
 
                     // redirect to home page
-                    return $this->redirectTo(['page_name' => $homePageUrl]);
+                    return $this->redirectTo(['page_name' => $this->getView()->pageUrl('home')]);
                 }
             }
         }
@@ -111,13 +109,18 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
 
                     // redirect to the buying page
                     if ($transactionPayable) {
-                        // TODO: Pay page ???
-                        echo 'redirect to the buy page';
-                        exit;
-                        /*return $this->redirectTo('payments', 'buy', array(
-                            'slug'  => $transactionInfo['slug'],
-                            'extra' => $transactionInfo['payment_name']
-                        ));*/
+                        $buyItemsPageUrl = $this->getView()->pageUrl('buy-items', [], null, true);
+
+                        if (false !== $buyItemsPageUrl) {
+                            return $this->redirectTo([
+                                'page_name' => $buyItemsPageUrl, 
+                                'slug' => $transactionInfo['slug']
+                            ], false, ['payment_name' => $transactionInfo['payment_name']]);
+                        }
+
+                        $this->getFlashMessenger()
+                            ->setNamespace('error')
+                            ->addMessage($this->translate('Sorry you cannot see the buy items page'));
                     }
                     else {
                         // activate the transaction and redirect to the success page

@@ -251,6 +251,23 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 -- system pages and widgets
 
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
+('buy-items', 'Buy items', @moduleId, 1, 'Payment\\PagePrivacy\\PaymentBuyItemsPrivacy', 1, 1, 1, 1, 1, 1, NULL);
+SET @buyItemsPageId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
+(@buyItemsPageId, 1);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`, `allow_cache`) VALUES
+('paymentBuyItemsWidget', @moduleId, 'public', 'Buy items', NULL, 1, @buyItemsPageId, 1);
+SET @paymentBuyItemsWidgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
+(@buyItemsPageId,  @paymentBuyItemsWidgetId,  1);
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@buyItemsPageId,  @paymentBuyItemsWidgetId);
+
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
 ('successful-payment', 'Successful payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
 SET @paymentSuccessPageId = (SELECT LAST_INSERT_ID());
 
@@ -291,7 +308,8 @@ SET @checkoutPageId = (SELECT LAST_INSERT_ID());
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
 (@checkoutPageId, 1),
 (@checkoutPageId, @paymentSuccessPageId),
-(@checkoutPageId, @paymentErrorPageId);
+(@checkoutPageId, @paymentErrorPageId),
+(@checkoutPageId, @buyItemsPageId);
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
 ('paymentCheckoutWidget', @moduleId, 'public', 'Checkout', NULL, 1, @checkoutPageId);

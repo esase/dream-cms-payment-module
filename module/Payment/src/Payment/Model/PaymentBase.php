@@ -106,6 +106,12 @@ class PaymentBase extends ApplicationAbstractBase
     const TRANSACTION_MIN_SLUG_LENGTH = 20;
 
     /**
+     * Transaction info
+     * @var array
+     */
+    protected static $transactionInfo = [];
+
+    /**
      * Save shopping cart currency
      *
      * @param string $currency
@@ -612,10 +618,19 @@ class PaymentBase extends ApplicationAbstractBase
      * @param string $field
      * @param boolean $onlyPrimaryCurrency
      * @param integer $userId
+     * @param boolean
      * @return array
      */
-    public function getTransactionInfo($id, $onlyNotPaid = true, $field = 'id', $onlyPrimaryCurrency = true, $userId = 0)
+    public function getTransactionInfo($id, $onlyNotPaid = true,
+            $field = 'id', $onlyPrimaryCurrency = true, $userId = 0, $currentLanguage = true)
     {
+        // check data in a memory
+        $argsHash = md5(implode('', func_get_args()));
+
+        if (isset(self::$transactionInfo[$argsHash])) {
+            return self::$transactionInfo[$argsHash];
+        }
+
         $currencyCondition = $onlyPrimaryCurrency
             ? new Expression('a.currency = b.id and b.primary_currency = ?', [self::PRIMARY_CURRENCY])
             : new Expression('a.currency = b.id');
@@ -664,8 +679,14 @@ class PaymentBase extends ApplicationAbstractBase
                 'left'
             )
             ->where([
-                ($field == 'id' ? 'a.id' : 'a.slug') => $id
+                ($field == 'id' ? 'a.id' : 'a.slug') => $id                
             ]);
+
+        if ($currentLanguage) {
+            $select->where([
+                'language' => $this->getCurrentLanguage()
+            ]);
+        }
 
         if ($onlyNotPaid) {
             $select->where([
@@ -682,7 +703,10 @@ class PaymentBase extends ApplicationAbstractBase
         $statement = $this->prepareStatementForSqlObject($select);
         $result = $statement->execute();
 
-        return $result->current();
+        $transaction = $result->current();
+        self::$transactionInfo[$argsHash] = $transaction;
+
+        return $transaction;
     }
 
     /**

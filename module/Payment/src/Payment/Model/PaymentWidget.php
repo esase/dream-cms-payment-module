@@ -15,7 +15,13 @@ use Zend\Paginator\Adapter\DbSelect as DbSelectPaginator;
 use Exception;
 
 class PaymentWidget extends PaymentBase
-{
+{   
+    /**
+     * Payments types
+     * @var array
+     */
+    protected static $paymentsTypes = [];
+
     /**
      * Add a new transaction
      *
@@ -148,6 +154,13 @@ class PaymentWidget extends PaymentBase
      */
     public function getPaymentsTypes($keyId = true, $fullArray = false)
     {
+        // check data in a memory
+        $argsHash = md5(implode('', func_get_args()));
+
+        if (isset(self::$paymentsTypes[$argsHash])) {
+            return self::$paymentsTypes[$argsHash];
+        }
+
         $paymentsTypes = [];
 
         $select = $this->select();
@@ -173,6 +186,8 @@ class PaymentWidget extends PaymentBase
                 ? $payment
                 : $payment['description'];
         }
+
+        self::$paymentsTypes[$argsHash] = $paymentsTypes;
 
         return $paymentsTypes;
     }

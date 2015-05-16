@@ -22,7 +22,7 @@ class PaymentBuyItemsPrivacy extends PageAbstractPagePrivacy
         if (!$this->model) {
             $this->model = ServiceLocatorService::getServiceLocator()
                 ->get('Application\Model\ModelManager')
-                ->getInstance('Payment\Model\PaymentBase');
+                ->getInstance('Payment\Model\PaymentWidget');
         }
 
         return $this->model;
@@ -47,6 +47,21 @@ class PaymentBuyItemsPrivacy extends PageAbstractPagePrivacy
             if (null == ($transactionInfo = 
                     $this->getModel()->getTransactionInfo($transactionId, true, 'slug'))) {
 
+                return false;
+            }
+
+            if ($transactionInfo['amount'] <= 0) {
+                return false;
+            }
+
+            if (null == ($paymentsTypes =
+                    $this->getModel()->getPaymentsTypes(false, true))) {
+
+                return false;
+            }
+
+            // check count of transaction's items
+            if (!count($this->getModel()->getAllTransactionItems($transactionInfo['id']))) {
                 return false;
             }
         }

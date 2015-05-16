@@ -52,6 +52,14 @@ class Module implements ConsoleUsageProviderInterface
     {
         return [
             'factories' => [
+                'Payment\Type\PaymentTypeManager' => function($serviceManager)
+                {
+                    $basePaymentModel = $serviceManager
+                        ->get('Application\Model\ModelManager')
+                        ->getInstance('Payment\Model\PaymentBase');
+
+                    return new Type\PaymentTypeManager($basePaymentModel);
+                },
                 'Payment\Handler\PaymentHandlerManager' => function($serviceManager)
                 {
                     return new Handler\PaymentHandlerManager($serviceManager);

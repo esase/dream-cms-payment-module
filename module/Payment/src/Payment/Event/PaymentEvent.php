@@ -1,10 +1,10 @@
 <?php
 namespace Payment\Event;
 
-use Application\Service\ApplicationSetting as ApplicationSettingService;
+use Application\Service\ApplicationSetting as SettingService;
 use User\Service\UserIdentity as UserIdentityService;
 use Application\Event\ApplicationAbstractEvent;
-use Application\Utility\ApplicationEmailNotification as ApplicationEmailNotificationUtility;
+use Application\Utility\ApplicationEmailNotification as EmailNotificationUtility;
 use Localization\Service\Localization as LocalizationService;
 
 class PaymentEvent extends ApplicationAbstractEvent
@@ -130,10 +130,10 @@ class PaymentEvent extends ApplicationAbstractEvent
                 $transactionId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
 
         // send an email notification about register the new transaction
-        if ((int) ApplicationSettingService::getSetting('payment_transaction_add')) {
-            ApplicationEmailNotificationUtility::sendNotification(ApplicationSettingService::getSetting('application_site_email'),
-                ApplicationSettingService::getSetting('payment_transaction_add_title', LocalizationService::getDefaultLocalization()['language']),
-                ApplicationSettingService::getSetting('payment_transaction_add_message', LocalizationService::getDefaultLocalization()['language']), [
+        if ((int) SettingService::getSetting('payment_transaction_add')) {
+            EmailNotificationUtility::sendNotification(SettingService::getSetting('application_site_email'),
+                SettingService::getSetting('payment_transaction_add_title', LocalizationService::getDefaultLocalization()['language']),
+                SettingService::getSetting('payment_transaction_add_message', LocalizationService::getDefaultLocalization()['language']), [
                     'find' => [
                         'FirstName',
                         'LastName',
@@ -350,10 +350,10 @@ class PaymentEvent extends ApplicationAbstractEvent
                 $transactionId, self::getUserId($isSystemEvent), $eventDesc, $eventDescParams);
 
         // send an email notification about the paid transaction
-        if ($transactionInfo && (int) ApplicationSettingService::getSetting('payment_transaction_paid')) {
-            ApplicationEmailNotificationUtility::sendNotification(ApplicationSettingService::getSetting('application_site_email'),
-                ApplicationSettingService::getSetting('payment_transaction_paid_title', LocalizationService::getDefaultLocalization()['language']),
-                ApplicationSettingService::getSetting('payment_transaction_paid_message', LocalizationService::getDefaultLocalization()['language']), [
+        if ($transactionInfo && (int) SettingService::getSetting('payment_transaction_paid')) {
+            EmailNotificationUtility::sendNotification(SettingService::getSetting('application_site_email'),
+                SettingService::getSetting('payment_transaction_paid_title', LocalizationService::getDefaultLocalization()['language']),
+                SettingService::getSetting('payment_transaction_paid_message', LocalizationService::getDefaultLocalization()['language']), [
                     'find' => [
                         'FirstName',
                         'LastName',

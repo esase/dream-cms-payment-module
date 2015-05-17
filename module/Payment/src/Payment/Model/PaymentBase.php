@@ -106,6 +106,16 @@ class PaymentBase extends ApplicationAbstractBase
     const TRANSACTION_MIN_SLUG_LENGTH = 20;
 
     /**
+     * Item deleted flag
+     */ 
+    const ITEM_DELETED = 1;
+
+    /**
+     * Item not deleted flag
+     */ 
+    const ITEM_NOT_DELETED = 0;
+
+    /**
      * Transaction info
      * @var array
      */

@@ -3,7 +3,7 @@ namespace Payment\Form;
 
 use Application\Form\ApplicationCustomFormBuilder;
 use Application\Form\ApplicationAbstractCustomForm;
-use Payment\Model\PaymentBase as PaymentModelBase;
+use Payment\Model\PaymentBase as PaymentBaseModel;
 
 class PaymentTransactionFilter extends ApplicationAbstractCustomForm 
 {
@@ -26,12 +26,6 @@ class PaymentTransactionFilter extends ApplicationAbstractCustomForm
     protected $notValidatedElements = ['submit'];
 
     /**
-     * Model
-     * @var object
-     */
-    protected $model;
-
-    /**
      * Form elements
      * @var array
      */
@@ -46,8 +40,8 @@ class PaymentTransactionFilter extends ApplicationAbstractCustomForm
             'type' => ApplicationCustomFormBuilder::FIELD_SELECT,
             'label' => 'Paid',
             'values' => [
-                PaymentModelBase::TRANSACTION_PAID  => 'Yes',
-                PaymentModelBase::TRANSACTION_NOT_PAID => 'No'
+                PaymentBaseModel::TRANSACTION_PAID  => 'Yes',
+                PaymentBaseModel::TRANSACTION_NOT_PAID => 'No'
             ]
         ],
         'email' => [

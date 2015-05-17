@@ -23,6 +23,144 @@ class PaymentWidget extends PaymentBase
     protected static $paymentsTypes = [];
 
     /**
+     * Hide user transaction
+     *
+     * @param integer $transactionId
+     * @param integer $userId
+     * @return boolean|string
+     */
+    public function hideUserTransaction($transactionId, $userId)
+    {
+        try {
+            $this->adapter->getDriver()->getConnection()->beginTransaction();
+
+            $update = $this->update()
+                ->table('payment_transaction_list')
+                ->set([
+                    'user_hidden' => self::TRANSACTION_USER_HIDDEN
+                ])
+                ->where([
+                    'id' => $transactionId,
+                    'user_id' => $userId,
+                    'language' => $this->getCurrentLanguage()
+                ]);
+
+            $statement = $this->prepareStatementForSqlObject($update);
+            $statement->execute();
+
+            $this->adapter->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->adapter->getDriver()->getConnection()->rollback();
+            ApplicationErrorLogger::log($e);
+
+            return $e->getMessage();
+        }
+
+        // fire hide payment transaction event
+        PaymentEvent::fireHidePaymentTransactionEvent($transactionId);
+        return true;
+    }
+
+    /**
+     * Get user transactions
+     *
+     * @param integer $userId
+     * @param integer $page
+     * @param integer $perPage
+     * @param string $orderBy
+     * @param string $orderType
+     * @param array $filters
+     *      string filter_slug
+     *      integer filter_paid
+     *      string filter_date
+     * @return Zend\Paginator\Paginator
+     */
+    public function getUserTransactions($userId, $page = 1, $perPage = 0, $orderBy = null, $orderType = null, array $filters = [])
+    {
+        $orderFields = [
+            'id',
+            'slug',
+            'paid',
+            'cost',
+            'date',
+            'currency'
+        ];
+
+        $orderType = !$orderType || $orderType == 'desc'
+            ? 'desc'
+            : 'asc';
+
+        $orderBy = $orderBy && in_array($orderBy, $orderFields)
+            ? $orderBy
+            : 'id';
+
+        $select = $this->select();
+        $select->from(['a' => 'payment_transaction_list'])
+            ->columns([
+                'id',
+                'slug',
+                'paid',
+                'cost' => 'amount',
+                'date'
+            ])
+            ->join(
+                ['b' => 'payment_currency'],
+                'a.currency = b.id',
+                [
+                    'currency' => 'code'
+                ]
+            )
+            ->join(
+                ['c' => 'payment_transaction_item'],
+                'a.id = c.transaction_id',
+                [
+                   'items_count' => new Expression('count(c.object_id)')
+                ],
+                'left'
+            )
+            ->where([
+                'a.user_id' => $userId,
+                'a.user_hidden' => self::TRANSACTION_USER_NOT_HIDDEN,
+                'a.language' => $this->getCurrentLanguage()
+            ])
+            ->group('a.id')
+            ->order($orderBy . ' ' . $orderType);
+
+        // filter by a slug
+        if (!empty($filters['filter_slug'])) {
+            $select->where([
+                'a.slug' => $filters['filter_slug']
+            ]);
+        }
+
+        // filter by a paid status
+        if (isset($filters['filter_paid']) && $filters['filter_paid'] != null) {
+            $select->where([
+                'a.paid' => ((int) $filters['filter_paid'] == self::TRANSACTION_PAID
+                    ? $filters['filter_paid']
+                    : self::TRANSACTION_NOT_PAID)
+            ]);
+        }
+
+        // filter by a created date
+        if (!empty($filters['filter_date'])) {
+            list($dateStart, $dateEnd) =
+                    $this->getDateRange(date('Y-m-d', $filters['filter_date']));
+
+            $select->where->greaterThanOrEqualTo('a.date', $dateStart);
+            $select->where->lessThanOrEqualTo('a.date', $dateEnd);
+        }
+
+        $paginator = new Paginator(new DbSelectPaginator($select, $this->adapter));
+        $paginator->setCurrentPageNumber($page);
+        $paginator->setItemCountPerPage(PaginationUtility::processPerPage($perPage));
+        $paginator->setPageRange(SettingService::getSetting('application_page_range'));
+
+        return $paginator;
+    }
+
+    /**
      * Add a new transaction
      *
      * @param integer $userId

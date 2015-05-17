@@ -1,0 +1,84 @@
+<?php $this->declareVars('currentPageUrl') ?>
+<?php $this->currentPage = $this->pageUrl('dashboard') ?>
+
+<!-- render a data grid -->
+<?php echo $this->partial('partial/data-grid', [
+    'page_name' => $this->currentPage,
+    'use_query' => true,
+    'url_fragment' => 'transactions',
+    'page_param_name' => $this->page_param_name,
+    'per_page_param_name' => $this->per_page_param_name,
+    'order_by_param_name' => $this->order_by_param_name,
+    'order_type_param_name' => $this->order_type_param_name,
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'id',
+    'default_order_type' => 'desc',
+    'filter_form' => $this->filter_form,
+    'headers' => [
+        [
+            'title' => $this->translate('ID'),
+            'order_name' => 'id'
+        ],
+        [
+            'title' => $this->translate('Code'),
+            'order_name' => 'slug'
+        ],
+        [
+            'title' => $this->translate('Paid'),
+            'order_name' => 'paid'
+        ],
+        [
+            'title' => $this->translate('Total amount'),
+            'order_name' => 'cost'
+        ],
+        [
+            'title' => $this->translate('Date'),
+            'order_name' => 'date'
+        ]
+    ],
+    'filter_form' => $this->filter_form,
+    'paginator' => $this->paginator,
+    'skipped_fields' => [
+        'currency',
+        'items_count'
+    ],
+    'helpers' => [
+        'paid' => 'applicationBooleanValue',
+        'cost' => 'paymentCostFormat',
+        'date' => 'applicationDate',
+        'payment' => 'translate',
+    ],
+    'helpers_set_array' => [
+        'cost' => true
+    ],
+    'helpers_options' => [
+    ],
+    'actions' => [
+        'regular_actions' => [
+        ],
+        'multiple_actions' => [
+            [
+                'name' => $this->translate('Delete selected'),
+                'page_name' => $this->currentPage,
+                'check_acl' => false,
+                'confirm' => $this->translate('Selected transactions will be deleted. Are you sure?'),
+                'queries' => [
+                    'action' => 'delete'
+                ]
+            ]
+        ],
+        'single_actions' => [
+        ]
+    ],
+    'actions_options' => [
+        'action_identity' => 'id',
+        'form_name' => 'transactions',
+        'multiple_actions' => [
+            'items_name' => 'transactions[]'
+        ]
+    ],
+    'actions_extra_check' => [
+    ]
+]) ?>

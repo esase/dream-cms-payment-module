@@ -85,6 +85,27 @@ class PaymentEvent extends ApplicationAbstractEvent
     const ADD_PAYMENT_TRANSACTION = 'add_payment_transaction';
 
     /**
+     * Hide payment transaction event
+     */
+    const HIDE_PAYMENT_TRANSACTION = 'hide_payment_transaction';
+
+    /**
+     * Fire hide payment transaction event
+     *
+     * @param integer $transactionId
+     * @return void
+     */
+    public static function fireHidePaymentTransactionEvent($transactionId)
+    {
+        // event's description
+        $eventDesc = 'Event - Payment transaction hide by user';
+        $eventDescParams = [UserIdentityService::getCurrentUserIdentity()['nick_name'], $transactionId];
+
+        self::fireEvent(self::HIDE_PAYMENT_TRANSACTION, 
+                $transactionId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire edit item into shopping cart event
      *
      * @param integer $itemId

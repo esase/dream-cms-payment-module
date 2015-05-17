@@ -53,7 +53,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('activate_discount_coupon', @moduleId, 'Event - Activating discount coupons'),
 ('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons'),
 ('edit_item_into_shopping_cart', @moduleId, 'Event - Editing items into the shopping cart'),
-('add_payment_transaction', @moduleId, 'Event - Adding payment transactions');
+('add_payment_transaction', @moduleId, 'Event - Adding payment transactions'),
+('hide_payment_transaction', @moduleId, 'Event - Hiding payment transactions');
 
 -- application settings
 
@@ -352,6 +353,15 @@ SET @paymentShoppingCartInfoWidgetId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_widget_connection` (`widget_id`, `position_id`) VALUES
 (@paymentShoppingCartInfoWidgetId, 2);
+
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('paymentTransactionHistoryWidget', @moduleId, 'public', 'List of transactions', NULL, NULL, NULL);
+SET @paymentTransactionHistoryWidgetId = (SELECT LAST_INSERT_ID());
+
+SET @userDashboardPageId = (SELECT `id` FROM `page_system` WHERE `slug` = 'dashboard');
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(@userDashboardPageId,  @paymentTransactionHistoryWidgetId);
 
 -- module tables
 

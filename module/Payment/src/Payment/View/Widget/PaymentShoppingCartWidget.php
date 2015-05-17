@@ -17,14 +17,14 @@ class PaymentShoppingCartWidget extends PaymentAbstractWidget
 
             $items = $this->getRequest()->getPost('items');
 
-            switch($this->getRequest()->getQuery('action')) {
-                // delete shopping cart items
-                case 'delete' :
-                    if ($items && is_array($items)) {
+            if ($items && is_array($items)) {
+                switch($this->getRequest()->getQuery('action')) {
+                    // delete shopping cart items
+                    case 'delete' :
                         return $this->deleteItems($items);
-                    }
 
-                default :
+                    default :
+                }
             }
         }
 

@@ -106,16 +106,6 @@ class PaymentBase extends ApplicationAbstractBase
     const TRANSACTION_MIN_SLUG_LENGTH = 20;
 
     /**
-     * Item deleted flag
-     */ 
-    const ITEM_DELETED = 1;
-
-    /**
-     * Item not deleted flag
-     */ 
-    const ITEM_NOT_DELETED = 0;
-
-    /**
      * Transaction info
      * @var array
      */
@@ -420,24 +410,30 @@ class PaymentBase extends ApplicationAbstractBase
     /**
      * Get all transaction items
      *
+     * @param integer $transactionId
+     * @param integer $userId
+     * @param boolean $currentLanguage
      * @return array
      */
-    public function getAllTransactionItems($transactionId)
+    public function getAllTransactionItems($transactionId, $userId = null, $currentLanguage = false)
     {
         $select = $this->select();
         $select->from(['a' => 'payment_transaction_item'])
             ->columns([
+                'title',
                 'object_id',
                 'cost',
                 'discount',
-                'count'
+                'count',
+                'slug'
             ])
             ->join(
                 ['b' => 'payment_module'],
                 'a.module = b.module',
                 [
                     'countable',
-                    'handler'
+                    'handler',
+                    'page_name'
                 ]
             )
             ->join(
@@ -445,9 +441,28 @@ class PaymentBase extends ApplicationAbstractBase
                 new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
                 []
             )
+            ->join(
+                ['d' => 'payment_transaction_list'],
+                'a.transaction_id = d.id',
+                []
+            )
             ->where([
-                'transaction_id' => $transactionId
+                'a.transaction_id' => $transactionId
             ]);
+
+        // filter by user id
+        if ($userId) {
+            $select->where([
+                'd.user_id' => $userId
+            ]);
+        }
+
+        // filter by current language
+        if ($currentLanguage) {
+            $select->where([
+                'd.language' => $this->getCurrentLanguage()
+            ]);
+        }
 
         $statement = $this->prepareStatementForSqlObject($select);
         $resultSet = new ResultSet;

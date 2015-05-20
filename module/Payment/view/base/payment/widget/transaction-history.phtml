@@ -1,11 +1,36 @@
-<?php $this->declareVars('currentPageUrl') ?>
+<?php $this->declareVars('currentPageUrl', 'buyItemsPageUrl', 'singleActions') ?>
 <?php $this->currentPage = $this->pageUrl('dashboard') ?>
+<?php $this->buyItemsPageUrl = $this->pageUrl('buy-items', [], null, true) ?>
+
+<?php
+    $this->singleActions = [];
+
+    if (false !== $this->buyItemsPageUrl) {
+        $this->singleActions = [
+            [
+                'name' => $this->translate('Buy items'),
+                'page_name' => $this->buyItemsPageUrl,
+                'action' => 'buy',
+                'check_acl' => false,
+                'image' => $this->layoutAsset('icon/buy_action.png', 'image', 'payment'),
+                'param' => 'slug'
+            ]
+        ];
+    }
+
+    $this->singleActions = array_merge($this->singleActions, [
+        [
+            'name' => $this->translate('View the transaction\'s items'),
+            'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-transaction-items']) . '?id=__value__\', \'popup-transaction-items-window\')',
+            'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
+        ]
+    ]);
+?>
 
 <!-- render a data grid -->
 <?php echo $this->partial('partial/data-grid', [
     'page_name' => $this->currentPage,
     'use_query' => true,
-    'url_fragment' => 'transactions',
     'page_param_name' => $this->page_param_name,
     'per_page_param_name' => $this->per_page_param_name,
     'order_by_param_name' => $this->order_by_param_name,
@@ -16,6 +41,11 @@
     'default_order' => 'id',
     'default_order_type' => 'desc',
     'filter_form' => $this->filter_form,
+    'ajax' => [
+        'wrapper_id' => $this->data_grid_wrapper,
+        'widget_connection' => $this->widget_connection,
+        'widget_position' => $this->widget_position
+    ],
     'headers' => [
         [
             'title' => $this->translate('ID'),
@@ -69,8 +99,7 @@
                 ]
             ]
         ],
-        'single_actions' => [
-        ]
+        'single_actions' => $this->singleActions
     ],
     'actions_options' => [
         'action_identity' => 'id',
@@ -80,5 +109,20 @@
         ]
     ],
     'actions_extra_check' => [
+        'single_actions' => [
+            'buy' => [
+                [
+                    'function' => function($data) use ($payment_types, $current_currency) {
+                        if (!count($payment_types) || Payment\Model\PaymentBase::TRANSACTION_PAID == $data['paid']
+                                || $data['currency'] != $current_currency['code']) {
+
+                            return false;
+                        }
+
+                        return true;
+                    }
+                ]
+            ]
+        ]
     ]
 ]) ?>

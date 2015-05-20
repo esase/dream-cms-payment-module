@@ -251,8 +251,8 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 
 -- system pages and widgets
 
-INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('buy-items', 'Buy items', @moduleId, 1, 'Payment\\PagePrivacy\\PaymentBuyItemsPrivacy', 1, 1, 1, 1, 1, 1, NULL);
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
+('buy-items', 'Buy items', @moduleId, 1, 'Payment\\PagePrivacy\\PaymentBuyItemsPrivacy', 1, 1, 1, 1, 1, 1, NULL, 1);
 SET @buyItemsPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
@@ -268,8 +268,8 @@ INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
 INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
 (@buyItemsPageId,  @paymentBuyItemsWidgetId);
 
-INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('successful-payment', 'Successful payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
+('successful-payment', 'Successful payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL, NULL);
 SET @paymentSuccessPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
@@ -285,8 +285,8 @@ INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
 INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
 (@paymentSuccessPageId,  @paymentSuccessPaymentWidgetId);
 
-INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('failed-payment', 'Failed payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
+('failed-payment', 'Failed payment', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL, NULL);
 SET @paymentErrorPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
@@ -302,8 +302,8 @@ INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
 INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
 (@paymentErrorPageId,  @paymentErrorPaymentWidgetId);
 
-INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('checkout', 'Checkout', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL);
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
+('checkout', 'Checkout', @moduleId, 1, NULL, 1, 1, 1, 1, 1, 1, NULL, NULL);
 SET @checkoutPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES
@@ -322,8 +322,8 @@ INSERT INTO `page_system_widget_depend` (`page_id`, `widget_id`, `order`) VALUES
 INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
 (@checkoutPageId,  @checkoutWidgetId);
 
-INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`) VALUES
-('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL);
+INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
+('shopping-cart', 'Shopping cart', @moduleId, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, NULL, NULL);
 SET @shoppingCartPageId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_system_page_depend` (`page_id`, `depend_page_id`) VALUES

@@ -3,6 +3,7 @@
 namespace Payment\View\Widget;
 
 use User\Service\UserIdentity as UserIdentityService;
+use  Payment\Service\Payment as PaymentService;
 
 class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
 {
@@ -67,7 +68,12 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
         $paginator = $this->getModel()->
                 getUserTransactions($userId, $page, $perPage, $orderBy, $orderType, $filters, $fieldsPostfix);
 
-        return $this->getView()->partial('payment/widget/transaction-history', [
+        $dataGridWrapper = 'transactions-wrapper';
+
+        // get data grid
+        $dataGrid = $this->getView()->partial('payment/widget/transaction-history', [
+            'current_currency' => PaymentService::getPrimaryCurrency(),
+            'payment_types' =>  $this->getModel()->getPaymentsTypes(false, true),
             'filter_form' => $filterForm->getForm(),
             'paginator' => $paginator,
             'order_by' => $orderBy,
@@ -76,8 +82,20 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
             'page_param_name' => $pageParamName,
             'per_page_param_name' => $perPageParamName,
             'order_by_param_name' => $orderByParamName,
-            'order_type_param_name' => $orderTypeParamName
+            'order_type_param_name' => $orderTypeParamName,
+            'widget_connection' =>  $this->widgetConnectionId,
+            'widget_position' => $this->widgetPosition,
+            'data_grid_wrapper' => $dataGridWrapper
         ]);
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            return $dataGrid;
+        }
+
+        return $this->getView()->partial('payment/widget/transaction-history-wrapper', [
+            'data_grid_wrapper' => $dataGridWrapper,
+            'data_grid' => $dataGrid
+         ]);
     }
 
     /**
@@ -107,7 +125,7 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
         $hideResult = false;
         $hiddenCount = 0;
 
-        foreach ($transactionsIds as $transactionId) {
+        foreach ($transactionsIds as $transactionId) {       
             // hide the transaction
             if (true !== ($hideResult = $this->
                     getModel()->hideUserTransaction($transactionId, $userId))) {

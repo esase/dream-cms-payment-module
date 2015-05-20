@@ -2,6 +2,7 @@
 
 namespace Payment\Controller;
 
+use User\Service\UserIdentity as UserIdentityService;
 use Payment\Event\PaymentEvent;
 use Payment\Service\Payment as PaymentService;
 use Payment\Handler\PaymentInterfaceHandler;
@@ -29,6 +30,26 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         }
 
         return $this->model;
+    }
+
+    /**
+     * View transaction items
+     */
+    public function ajaxViewTransactionItemsAction()
+    {
+        $transasctionId = $this->params()->fromQuery('id', -1);
+        $userId = UserIdentityService::getCurrentUserIdentity()['user_id'];
+
+        // get transaction items list
+        if (null == ($items = $this->
+                getModel()->getAllTransactionItems($transasctionId, $userId, true))) {
+
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        return new ViewModel([
+            'items' => $items
+        ]);
     }
 
     /**

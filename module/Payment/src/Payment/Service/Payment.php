@@ -1,4 +1,5 @@
 <?php
+
 namespace Payment\Service;
 
 use Application\Service\ApplicationServiceLocator as ServiceLocator;

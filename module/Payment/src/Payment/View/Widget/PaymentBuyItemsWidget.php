@@ -1,4 +1,5 @@
 <?php
+
 namespace Payment\View\Widget;
 
 class PaymentBuyItemsWidget extends PaymentAbstractWidget

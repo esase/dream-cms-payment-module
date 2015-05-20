@@ -9,17 +9,9 @@ class PaymentItemLink extends AbstractHelper
      * Payment item status
      *
      * @param array $info
-     *      integer id
-     *      string title
-     *      float cost
-     *      float discount
-     *      integer count
-     *      string slug
      *      string page_name
-     *      integer countable
-     *      integer must_login
-     *      string handler
-     *      integer object_id
+     *      sting slug
+     *      string title
      * @return string
      */
     public function __invoke($info)

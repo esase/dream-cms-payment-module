@@ -38,7 +38,7 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
                 $orderByParamName, $orderTypeParamName) = $this->getPaginationParams();
 
         $page = $this->getView()->applicationRoute()->getQueryParam($pageParamName, 1);
-        $perPage = $this->getView()->applicationRoute()->getQueryParam($perPageParamName, 1);
+        $perPage = $this->getView()->applicationRoute()->getQueryParam($perPageParamName);
         $orderBy = $this->getView()->applicationRoute()->getQueryParam($orderByParamName);
         $orderType = $this->getView()->applicationRoute()->getQueryParam($orderTypeParamName);
 

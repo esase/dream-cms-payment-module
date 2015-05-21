@@ -40,6 +40,11 @@
     'per_page' => $this->per_page,
     'default_order' => 'id',
     'default_order_type' => 'desc',
+    'ajax' => [
+        'wrapper_id' => $this->data_grid_wrapper,
+        'widget_connection' => $this->widget_connection,
+        'widget_position' => $this->widget_position
+    ],
     'headers' => [
         [
             'title' => $this->translate('ID'),

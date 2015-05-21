@@ -68,7 +68,7 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
         $paginator = $this->getModel()->
                 getUserTransactions($userId, $page, $perPage, $orderBy, $orderType, $filters, $fieldsPostfix);
 
-        $dataGridWrapper = 'transactions-wrapper';
+        $dataGridWrapper = 'transactions-page-wrapper';
 
         // get data grid
         $dataGrid = $this->getView()->partial('payment/widget/transaction-history', [

@@ -36,14 +36,28 @@ class PaymentShoppingCartWidget extends PaymentAbstractWidget
 
         // get data
         $paginator = $this->getModel()->getShoppingCartItems($page, $perPage, $orderBy, $orderType);
+        $dataGridWrapper = 'shopping-cart-page-wrapper';
 
-        return $this->getView()->partial('payment/widget/shopping-cart', [
+        // get data grid
+        $dataGrid = $this->getView()->partial('payment/widget/shopping-cart', [
             'paginator' => $paginator,
             'order_by' => $orderBy,
             'order_type' => $orderType,
             'per_page' => $perPage,
+            'widget_connection' =>  $this->widgetConnectionId,
+            'widget_position' => $this->widgetPosition,
+            'data_grid_wrapper' => $dataGridWrapper,
             'paymentHandlerManager' => $this->
                     getServiceLocator()->get('Payment\Handler\PaymentHandlerManager')
+        ]);
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            return $dataGrid;
+        }
+
+        return $this->getView()->partial('payment/widget/shopping-cart-wrapper', [
+            'data_grid_wrapper' => $dataGridWrapper,
+            'data_grid' => $dataGrid
         ]);
     }
 

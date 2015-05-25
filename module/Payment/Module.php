@@ -108,9 +108,16 @@ class Module implements ConsoleUsageProviderInterface
     /**
      * Get console usage info
      *
-     * @param object $console
+     * @param Zend\Console\Adapter\AdapterInterface $console
      * @return array
      */
     public function getConsoleUsage(Console $console)
-    {}
+    {
+        return [
+            // describe available commands
+            'payment clean expired items [--verbose|-v]' => 'Clean expired shopping cart and items and expired not paid transactions',
+            // describe expected parameters
+            ['--verbose|-v', '(optional) turn on verbose mode']
+        ];
+    }
 }

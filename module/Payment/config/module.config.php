@@ -5,7 +5,8 @@ return [
         'invokables' => [
             'payments-administration' => 'Payment\Controller\PaymentAdministrationController',
             'payments-widget' => 'Payment\Controller\PaymentWidgetController',
-            'payments' => 'Payment\Controller\PaymentProcessController'
+            'payments' => 'Payment\Controller\PaymentProcessController',
+            'payments-console' => 'Payment\Controller\PaymentConsoleController'
         ]
     ],
     'router' => [
@@ -15,6 +16,15 @@ return [
     'console' => [
         'router' => [
             'routes' => [
+                'payments clean' => [
+                    'options' => [
+                        'route'    => 'payment clean expired items [--verbose|-v]',
+                        'defaults' => [
+                            'controller' => 'payments-console',
+                            'action'     => 'cleanExpiredItems'
+                        ]
+                    ]
+                ]
             ]
         ]
     ],

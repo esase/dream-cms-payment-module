@@ -524,7 +524,7 @@ class PaymentBase extends ApplicationAbstractBase
      * @param string $type
      * @return boolean|string
      */
-    public function deleteTransaction($transactionId, $userId = 0, $type = null)
+    public function deleteTransaction($transactionId, $userId = null, $type = null)
     {
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();

@@ -32,8 +32,8 @@ return [
     'resources' => [
     ],
     'install_sql' => __DIR__ . '/../install/install.sql',
-    'install_intro' => null,
+    'install_intro' => 'payment_install_intro',
     'uninstall_sql' => __DIR__ . '/../install/uninstall.sql',
-    'uninstall_intro' => null,
+    'uninstall_intro' => 'payment_uninstall_intro',
     'layout_path' => 'payment'
 ];

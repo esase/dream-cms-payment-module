@@ -101,7 +101,20 @@ class PaymentWidget extends PaymentBase
                 'id',
                 'slug',
                 'paid',
-                'cost' => 'amount',
+                'cost' => new Expression('
+                    (                        
+                        SELECT 
+                            IF(d.discount IS NULL, 
+                                SUM(`cost` * `count` - `discount`), 
+                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * d.`discount` /100)) AS `amount`
+                        FROM
+                            `payment_transaction_item` tmp1
+                        WHERE
+                            tmp1.`transaction_id` = `a`.`id`
+                        GROUP BY
+                                tmp1.`transaction_id`
+                    )
+                '),
                 'date'
             ])
             ->join(
@@ -117,6 +130,12 @@ class PaymentWidget extends PaymentBase
                 [
                    'items_count' => new Expression('count(c.object_id)')
                 ],
+                'left'
+            )
+            ->join(
+                ['d' => 'payment_discount_cupon'],
+                'a.discount_cupon = d.id',
+                [],
                 'left'
             )
             ->where([
@@ -180,10 +199,9 @@ class PaymentWidget extends PaymentBase
      *      float cost
      *      float discount
      *      integer count
-     * @param float $amount
      * @return integer|string
      */
-    public function addTransaction($userId, array $transactionInfo, array $items, $amount)
+    public function addTransaction($userId, array $transactionInfo, array $items)
     {
         $transactionId = 0;
 
@@ -195,8 +213,7 @@ class PaymentWidget extends PaymentBase
                 'paid' => self::TRANSACTION_NOT_PAID,
                 'language' => $this->getCurrentLanguage(),
                 'date' => time(),
-                'currency' => PaymentService::getPrimaryCurrency()['id'],
-                'amount' => $amount
+                'currency' => PaymentService::getPrimaryCurrency()['id']
             ];
 
             // add the user id
@@ -262,7 +279,8 @@ class PaymentWidget extends PaymentBase
                         'slug' => $item['slug'],
                         'cost' => $item['cost'],
                         'discount' => $item['discount'],
-                        'count' => $item['count']
+                        'count' => $item['count'],
+                        'paid' => self::TRANSACTION_NOT_PAID,
                     ]);
 
                 $statement = $this->prepareStatementForSqlObject($insert);

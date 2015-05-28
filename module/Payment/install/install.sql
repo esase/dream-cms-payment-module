@@ -448,7 +448,6 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     `payment_type` TINYINT(3) UNSIGNED DEFAULT NULL,
     `comments` text DEFAULT NULL,
     `discount_cupon` SMALLINT(5) UNSIGNED DEFAULT NULL,
-    `amount` DECIMAL(10,2) NOT NULL,
     `user_hidden` TINYINT(1) UNSIGNED NOT NULL,
     `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
@@ -483,6 +482,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     `cost` DECIMAL(10,2) UNSIGNED NOT NULL,
     `discount` DECIMAL(10,2) UNSIGNED NOT NULL,
     `count` SMALLINT(5) UNSIGNED NOT NULL,
+    `paid` TINYINT(1) UNSIGNED NOT NULL,
     PRIMARY KEY (`object_id`, `module`, `transaction_id`),
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE

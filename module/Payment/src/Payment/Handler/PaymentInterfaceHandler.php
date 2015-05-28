@@ -1,4 +1,5 @@
 <?php
+
 namespace Payment\Handler;
 
 interface PaymentInterfaceHandler

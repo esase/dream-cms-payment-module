@@ -54,7 +54,20 @@ class PaymentAdministration extends PaymentBase
                 'slug',
                 'paid',
                 'email',
-                'cost' => 'amount',
+                'cost' => new Expression('
+                    (                        
+                        SELECT 
+                            IF(c.discount IS NULL, 
+                                SUM(`cost` * `count` - `discount`), 
+                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * c.`discount` /100)) AS `amount`
+                        FROM
+                            `payment_transaction_item` tmp1
+                        WHERE
+                            tmp1.`transaction_id` = `a`.`id`
+                        GROUP BY
+                                tmp1.`transaction_id`
+                    )
+                '),
                 'date'
             ])
             ->join(
@@ -63,6 +76,12 @@ class PaymentAdministration extends PaymentBase
                 [
                     'currency' => 'code'
                 ]
+            )
+            ->join(
+                ['c' => 'payment_discount_cupon'],
+                'a.discount_cupon = c.id',
+                [],
+                'left'
             )
             ->order($orderBy . ' ' . $orderType);
 

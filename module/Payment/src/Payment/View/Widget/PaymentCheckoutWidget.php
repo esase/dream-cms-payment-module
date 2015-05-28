@@ -93,7 +93,7 @@ class PaymentCheckoutWidget extends PaymentAbstractWidget
                 $userId   = UserIdentityService::getCurrentUserIdentity()['user_id'];
 
                 // add a new transaction
-                $result = $this->getModel()->addTransaction($userId, $formData, $shoppingCartItems, $amount);
+                $result = $this->getModel()->addTransaction($userId, $formData, $shoppingCartItems);
 
                 if (is_numeric($result)) {
                     // clear the shopping cart items

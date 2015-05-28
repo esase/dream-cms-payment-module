@@ -1,9 +1,14 @@
 <?php
+
 namespace Payment;
+
+use Payment\Event\PaymentEvent;
 
 use Zend\ModuleManager\ModuleManagerInterface;
 use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
 use Zend\Console\Adapter\AdapterInterface as Console;
+use Zend\ModuleManager\ModuleEvent as ModuleEvent;
+use Zend\EventManager\EventInterface;
 
 class Module implements ConsoleUsageProviderInterface
 {
@@ -16,12 +21,56 @@ class Module implements ConsoleUsageProviderInterface
     /**
      * Init
      *
-     * @param object $moduleManager
+     * @param Zend\ModuleManager\ModuleManagerInterface $moduleManager
      */
     public function init(ModuleManagerInterface $moduleManager)
     {
         // get service manager
         $this->serviceManager = $moduleManager->getEvent()->getParam('ServiceManager');
+
+        $moduleManager->getEventManager()->
+            attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'initPaymentListeners'));
+    }
+
+    /**
+     * Init payment listeners
+     *
+     * @param Zend\EventManager\EventInterface $e 
+     */
+    public function initPaymentListeners(EventInterface $e)
+    {
+        $model = $this->serviceManager
+            ->get('Application\Model\ModelManager')
+            ->getInstance('Payment\Model\PaymentBase');
+
+        // update a user transactions info
+        $eventManager = PaymentEvent::getEventManager();
+
+        if ($model->getModuleInfo('Payment')) {
+            // init edit and update events for payment modules
+            foreach ($model->getPaymentModules() as $module) {
+                // get the payment handler
+                $paymentHandler = $this->serviceManager
+                    ->get('Payment\Handler\PaymentHandlerManager')
+                    ->getInstance($module->handler);
+
+                // update items
+                $eventManager->attach($module->update_event, function ($e) 
+                        use ($model, $paymentHandler) {
+
+                    $model->updateItemGlobally($e->getParam('object_id'), $paymentHandler);
+                });
+
+                // delete items
+                $eventManager->attach($module->delete_event, function ($e) 
+                        use ($model, $module) {
+
+                    $model->deleteItemGlobally($e->getParam('object_id'), $module->module);
+                });
+            }
+        }
+
+        //\Application\Event\ApplicationEvent::fireEvent('xxx', 1, 1, '');
     }
 
     /**

@@ -56,9 +56,9 @@ class Module implements ConsoleUsageProviderInterface
 
                 // update items
                 $eventManager->attach($module->update_event, function ($e) 
-                        use ($model, $paymentHandler) {
+                        use ($model, $paymentHandler, $module) {
 
-                    $model->updateItemGlobally($e->getParam('object_id'), $paymentHandler);
+                    $model->updateItemGlobally($e->getParam('object_id'), $paymentHandler, $module);
                 });
 
                 // delete items
@@ -70,7 +70,7 @@ class Module implements ConsoleUsageProviderInterface
             }
         }
 
-        //\Application\Event\ApplicationEvent::fireEvent('xxx', 1, 1, '');
+        //\Application\Event\ApplicationEvent::fireEvent('yyy1', 1, 1, '');
     }
 
     /**

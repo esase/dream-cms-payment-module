@@ -116,15 +116,101 @@ class PaymentBase extends ApplicationAbstractBase
      *
      * @param integer $objectId
      * @param Payment\Handler\PaymentInterfaceHandler $paymentHandler
+     * @param ArrayObject $module
+     *      integer countable
+     *      integer module
      * @return boolean|string
      */
-    public function updateItemGlobally($objectId, Payment\Handler\PaymentInterfaceHandler $paymentHandler)
+    public function updateItemGlobally($objectId,
+            \Payment\Handler\PaymentInterfaceHandler $paymentHandler, \ArrayObject $module)
     {
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
             // get updated item's info
             $objectInfo = $paymentHandler->getItemInfo($objectId);
+            $deleteItem = $module->countable == self::MODULE_COUNTABLE && $objectInfo['count'] <= 0;
+
+            // delete item from the shopping cart and not paid transactions list
+            if ($deleteItem) {
+                $delete = $this->delete()
+                    ->from('payment_shopping_cart')
+                    ->where([
+                        'object_id' => $objectId,
+                        'module' => $module->module
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($delete);
+                $statement->execute();
+
+                $delete = $this->delete()
+                    ->from('payment_transaction_item')
+                    ->where([
+                        'object_id' => $objectId,
+                        'module' => $module->module,
+                        'paid' => self::TRANSACTION_NOT_PAID
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($delete);
+                $statement->execute();
+            }
+            else {
+                // main item's info
+                $data = [
+                    'title' =>  $objectInfo['title'],
+                    'slug'  =>  $objectInfo['slug']
+                ];
+
+                $extraData = [
+                    'cost'  => $objectInfo['cost'],
+                ];
+
+                if (isset($objectInfo['count'])) {
+                    $extraData = array_merge($extraData, [
+                        'count' => new Expression('IF (`count` > ?, ?, `count`)', [
+                            $objectInfo['count'],
+                            $objectInfo['count']
+                        ])
+                    ]);
+                }
+
+                // update item's info in the shopping cart
+                $update = $this->update()
+                    ->table('payment_shopping_cart')
+                    ->set(array_merge($data, $extraData))
+                    ->where([
+                        'object_id' => $objectId,
+                        'module' => $module->module
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($update);
+                $statement->execute();
+
+                // update title and slug for all transactions
+                $update = $this->update()
+                    ->table('payment_transaction_item')
+                    ->set($data)
+                    ->where([
+                        'object_id' => $objectId,
+                        'module' => $module->module
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($update);
+                $statement->execute();
+
+                // update cost and count only for not paid transactions
+                $update = $this->update()
+                    ->table('payment_transaction_item')
+                    ->set($extraData)
+                    ->where([
+                        'object_id' => $objectId,
+                        'module' => $module->module,
+                        'paid' => self::TRANSACTION_NOT_PAID
+                    ]);
+
+                $statement = $this->prepareStatementForSqlObject($update);
+                $statement->execute();
+            }
 
             $this->adapter->getDriver()->getConnection()->commit();
         }
@@ -135,172 +221,8 @@ class PaymentBase extends ApplicationAbstractBase
             return $e->getMessage();
         }
 
+        // TODO: FIRE EVENT
         return true;
-        /*
-        try {
-            $this->adapter->getDriver()->getConnection()->beginTransaction();
-
-            // object is not active
-            if (null == ($objectInfo = $paymentHandler->getItemInfo($objectId))) {
-                $update = $this->update()
-                    ->table('payment_shopping_cart')
-                    ->set(array(
-                        'active'  => self::ITEM_NOT_ACTIVE
-                    ))
-                    ->where(array(
-                        'object_id' => $objectId,
-                        'module' => $moduleInfo['module']
-                    ));
-
-                $statement = $this->prepareStatementForSqlObject($update);
-                $statement->execute();
-
-                $update = $this->update()
-                    ->table('payment_transaction_item')
-                    ->set(array(
-                        'active'  => self::ITEM_NOT_ACTIVE
-                    ))
-                    ->where(array(
-                        'object_id' => $objectId,
-                        'module' => $moduleInfo['module']
-                    ));
-
-                $statement = $this->prepareStatementForSqlObject($update);
-                $statement->execute();
-            }
-            else {
-                $countStatus = $moduleInfo['countable'] == self::MODULE_COUNTABLE && $objectInfo['count'] <= 0
-                    ? self::ITEM_NOT_AVAILABLE
-                    : self::ITEM_AVAILABLE;
-
-                // main info
-                $data = array(
-                    'title' =>  $objectInfo['title'],
-                    'slug'  =>  $objectInfo['slug']
-                );
-
-                // update the main info into shopping cart
-                $update = $this->update()
-                    ->table('payment_shopping_cart')
-                    ->set(array_merge($data, array(
-                        'available' => $countStatus,
-                        'active' => self::ITEM_ACTIVE
-                    )))
-                    ->where(array(
-                        'object_id' => $objectId,
-                        'module' => $moduleInfo['module']
-                    ));
-
-                $statement = $this->prepareStatementForSqlObject($update);
-                $statement->execute();
-
-                // update the main info into transactions
-                $update = $this->update()
-                    ->table('payment_transaction_item')
-                    ->set(array_merge($data, array(
-                        'active' => self::ITEM_ACTIVE
-                    )))
-                    ->where(array(
-                        'object_id' => $objectId,
-                        'module' => $moduleInfo['module']
-                    ));
-
-                $statement = $this->prepareStatementForSqlObject($update);
-                $statement->execute();
-
-                // update statuses for not paid transactions only
-                $select = $this->select();
-                $select->from(array('a' => 'payment_transaction_item'))
-                ->columns(array(
-                    'transaction_id'
-                ))
-                ->join(
-                    array('b' => 'payment_transaction'),
-                    new Expression('a.transaction_id  = b.id and b.paid = ?', array(self::TRANSACTION_NOT_PAID)),
-                    array()
-                )
-                ->where(array(
-                    'object_id' => $objectId,
-                    'module' => $moduleInfo['module']
-                ));
-
-                $statement = $this->prepareStatementForSqlObject($select);
-                $transactionItems = $statement->execute();
-                $transactionsIds  = array();
-
-                foreach ($transactionItems as $transactionItem) {
-                    $transactionsIds[] = $transactionItem['transaction_id'];
-
-                    $update = $this->update()
-                        ->table('payment_transaction_item')
-                        ->set(array(
-                            'available' => $countStatus,
-                            'active' => self::ITEM_ACTIVE
-                        ))
-                        ->where(array(
-                            'object_id' => $objectId,
-                            'module' => $moduleInfo['module'],
-                            'transaction_id' => $transactionItem['transaction_id']
-                        ));
-
-                    $statement = $this->prepareStatementForSqlObject($update);
-                    $statement->execute();
-                }
-
-                // update available count of items
-                if ($countStatus == self::ITEM_AVAILABLE
-                            && $moduleInfo['countable'] == self::MODULE_COUNTABLE) {
-
-                    $predicate = new Predicate();
-
-                    // update shopping cart items
-                    $update = $this->update()
-                        ->table('payment_shopping_cart')
-                        ->set(array(
-                            'count' => $objectInfo['count']
-                        ))
-                        ->where(array(
-                            'object_id' => $objectId,
-                            'module' => $moduleInfo['module'],
-                            $predicate->greaterThan('count', $objectInfo['count'])
-                        ));
-
-                    $statement = $this->prepareStatementForSqlObject($update);
-                    $statement->execute();
-
-                    // update not paid transactions items
-                    foreach ($transactionsIds as $transactionId) {
-                        $update = $this->update()
-                            ->table('payment_transaction_item')
-                            ->set(array(
-                                'count' => $objectInfo['count']
-                            ))
-                            ->where(array(
-                                'object_id' => $objectId,
-                                'module' => $moduleInfo['module'],
-                                'transaction_id' => $transactionId,
-                                $predicate->greaterThan('count', $objectInfo['count'])
-                            ));
-
-                        $statement = $this->prepareStatementForSqlObject($update);
-                        $statement->execute();
-                    }                    
-                }
-            }
-
-            // update transactions amount
-            $this->updateTransactionsAmount($objectId, $moduleInfo['module']);
-
-            $this->adapter->getDriver()->getConnection()->commit();
-        }
-        catch (Exception $e) {
-            $this->adapter->getDriver()->getConnection()->rollback();
-            ErrorLogger::log($e);
-
-            return $e->getMessage();
-        }
-
-        return true;*/
     }
 
     /**
@@ -363,7 +285,8 @@ class PaymentBase extends ApplicationAbstractBase
                 'module',
                 'update_event',
                 'delete_event',
-                'handler'
+                'handler',
+                'countable'
             ]);
 
         $statement = $this->prepareStatementForSqlObject($select);
@@ -958,12 +881,18 @@ class PaymentBase extends ApplicationAbstractBase
                                 SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * d.`discount` /100)) AS `amount`
                         FROM
                             `payment_transaction_item` tmp1
+                        INNER JOIN
+                            `application_module` tmp2
+                        ON
+                            tmp1.`module` = tmp2.`id`
+                                AND
+                            tmp2.`status` = ?
                         WHERE
                             tmp1.`transaction_id` = `a`.`id`
                         GROUP BY
                                 tmp1.`transaction_id`
                     )
-                ')
+                ', [self::MODULE_STATUS_ACTIVE])
             ])
             ->join(
                 ['b' => 'payment_currency'],

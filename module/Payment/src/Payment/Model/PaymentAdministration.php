@@ -57,17 +57,23 @@ class PaymentAdministration extends PaymentBase
                 'cost' => new Expression('
                     (                        
                         SELECT 
-                            IF(c.discount IS NULL, 
+                            IF(i.discount IS NULL, 
                                 SUM(`cost` * `count` - `discount`), 
-                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * c.`discount` /100)) AS `amount`
+                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * i.`discount` /100)) AS `amount`
                         FROM
                             `payment_transaction_item` tmp1
+                        INNER JOIN
+                            `application_module` tmp2
+                        ON
+                            tmp1.`module` = tmp2.`id`
+                                AND
+                            tmp2.`status` = ?
                         WHERE
                             tmp1.`transaction_id` = `a`.`id`
                         GROUP BY
                                 tmp1.`transaction_id`
                     )
-                '),
+                ', [self::MODULE_STATUS_ACTIVE]),
                 'date'
             ])
             ->join(
@@ -78,11 +84,22 @@ class PaymentAdministration extends PaymentBase
                 ]
             )
             ->join(
-                ['c' => 'payment_discount_cupon'],
-                'a.discount_cupon = c.id',
+                ['c' => 'payment_transaction_item'],
+                'a.id = c.transaction_id',
+                []
+            )
+            ->join(
+                ['d' => 'application_module'],
+                new Expression('d.id = c.module and d.status = ?', [self::MODULE_STATUS_ACTIVE]),
+                []
+            )
+            ->join(
+                ['i' => 'payment_discount_cupon'],
+                'a.discount_cupon = i.id',
                 [],
                 'left'
             )
+            ->group('a.id')
             ->order($orderBy . ' ' . $orderType);
 
         // filter by a slug

@@ -104,17 +104,23 @@ class PaymentWidget extends PaymentBase
                 'cost' => new Expression('
                     (                        
                         SELECT 
-                            IF(d.discount IS NULL, 
+                            IF(i.discount IS NULL, 
                                 SUM(`cost` * `count` - `discount`), 
-                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * d.`discount` /100)) AS `amount`
+                                SUM(`cost` * `count` - `discount`) - (SUM(`cost` * `count` - `discount`) * i.`discount` /100)) AS `amount`
                         FROM
                             `payment_transaction_item` tmp1
+                        INNER JOIN
+                            `application_module` tmp2
+                        ON
+                            tmp1.`module` = tmp2.`id`
+                                AND
+                            tmp2.`status` = ?
                         WHERE
                             tmp1.`transaction_id` = `a`.`id`
                         GROUP BY
                                 tmp1.`transaction_id`
                     )
-                '),
+                ', [self::MODULE_STATUS_ACTIVE]),
                 'date'
             ])
             ->join(
@@ -129,12 +135,16 @@ class PaymentWidget extends PaymentBase
                 'a.id = c.transaction_id',
                 [
                    'items_count' => new Expression('count(c.object_id)')
-                ],
-                'left'
+                ]
             )
             ->join(
-                ['d' => 'payment_discount_cupon'],
-                'a.discount_cupon = d.id',
+                ['d' => 'application_module'],
+                new Expression('d.id = c.module and d.status = ?', [self::MODULE_STATUS_ACTIVE]),
+                []
+            )
+            ->join(
+                ['i' => 'payment_discount_cupon'],
+                'a.discount_cupon = i.id',
                 [],
                 'left'
             )

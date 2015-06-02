@@ -123,11 +123,13 @@ class PaymentAdministration extends PaymentBase
             ]);
         }
 
-        // filter by a date
+        // filter by a created date
         if (!empty($filters['date'])) {
-            $select->where([
-                'a.date' => $filters['date']
-            ]);
+            list($dateStart, $dateEnd) =
+                    $this->getDateRange(date('Y-m-d', $filters['date']));
+
+            $select->where->greaterThanOrEqualTo('a.date', $dateStart);
+            $select->where->lessThanOrEqualTo('a.date', $dateEnd);
         }
 
         $paginator = new Paginator(new DbSelectPaginator($select, $this->adapter));

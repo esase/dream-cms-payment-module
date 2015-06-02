@@ -69,8 +69,6 @@ class Module implements ConsoleUsageProviderInterface
                 });
             }
         }
-
-        //\Application\Event\ApplicationEvent::fireEvent('yyy1', 1, 1, '');
     }
 
     /**

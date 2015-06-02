@@ -90,6 +90,50 @@ class PaymentEvent extends ApplicationAbstractEvent
     const HIDE_PAYMENT_TRANSACTION = 'hide_payment_transaction';
 
     /**
+     * Edit items event
+     */
+    const EDIT_ITEMS = 'edit_payment_items';
+
+    /**
+     * Delete items event
+     */
+    const DELETE_ITEMS = 'delete_payment_items';
+
+    /**
+     * Fire delete items event
+     *
+     * @param integer $objectId
+     * @param integer $moduleId
+     * @return void
+     */
+    public static function fireDeleteItemsEvent($objectId, $moduleId)
+    {
+        // event's description
+        $eventDesc = 'Event - Shopping cart and transactions items were deleted by the system';
+        self::fireEvent(self::DELETE_ITEMS, $objectId, self::getUserId(true), $eventDesc, [
+            $objectId, 
+            $moduleId
+        ]);
+    }
+
+    /**
+     * Fire edit items event
+     *
+     * @param integer $objectId
+     * @param integer $moduleId
+     * @return void
+     */
+    public static function fireEditItemsEvent($objectId, $moduleId)
+    {
+        // event's description
+        $eventDesc = 'Event - Shopping cart and transactions items were edited by the system';
+        self::fireEvent(self::EDIT_ITEMS, $objectId, self::getUserId(true), $eventDesc, [
+            $objectId, 
+            $moduleId
+        ]);
+    }
+
+    /**
      * Fire hide payment transaction event
      *
      * @param integer $transactionId

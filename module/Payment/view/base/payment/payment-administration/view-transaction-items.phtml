@@ -66,47 +66,22 @@
         [
             'title' => $this->translate('Total price'),
             'order_name' => 'total'
-        ],
-        [
-            'title' => $this->translate('Status')
-        ],
+        ]
     ],
     'paginator' => $this->paginator,
     'skipped_fields' => [
-        'view_controller',
-        'view_action',
-        'view_check',
-        'countable',
-        'slug',
-        'available',
-        'deleted',
-        'module_extra_options',
-        'handler',
-        'object_id',
-        'module_state'
+        'page_name',
+        'slug'
     ],
     'helpers' => [
-        'cost' => 'paymentCostFormat',
-        'discount' => 'paymentCostFormat',
-        'total' => 'paymentCostFormat',
-        'active' => 'paymentItemStatus',
-        'module' => 'translate'
+        'cost' => 'paymentProcessCost',
+        'discount' => 'paymentProcessCost',
+        'title' => 'paymentItemLink'
     ],
     'helpers_set_array' => [
-        'title' => true,
-        'extra_options' => true,
-        'active' => true
+        'title' => true
     ],
     'helpers_options' => [
-        'cost' => [
-            'currency' => $this->transaction['currency_code']  
-        ],
-        'discount' => [
-            'currency' => $this->transaction['currency_code']  
-        ],
-        'total' => [
-            'currency' => $this->transaction['currency_code']  
-        ],
     ],
     'actions' => [
         'regular_actions' => [

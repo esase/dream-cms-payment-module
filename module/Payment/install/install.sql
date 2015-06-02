@@ -54,7 +54,9 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('deactivate_discount_coupon', @moduleId, 'Event - Deactivating discount coupons'),
 ('edit_item_into_shopping_cart', @moduleId, 'Event - Editing items into the shopping cart'),
 ('add_payment_transaction', @moduleId, 'Event - Adding payment transactions'),
-('hide_payment_transaction', @moduleId, 'Event - Hiding payment transactions');
+('hide_payment_transaction', @moduleId, 'Event - Hiding payment transactions'),
+('edit_payment_items', @moduleId, 'Event - Editing shopping cart and transactions items'),
+('delete_payment_items', @moduleId, 'Event - Deleting shopping cart and transactions items');
 
 -- application settings
 

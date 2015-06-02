@@ -221,7 +221,7 @@ class PaymentBase extends ApplicationAbstractBase
             return $e->getMessage();
         }
 
-        // TODO: FIRE EVENT
+        PaymentEvent::fireEditItemsEvent($objectId, $module->module);
         return true;
     }
 
@@ -269,6 +269,7 @@ class PaymentBase extends ApplicationAbstractBase
             return $e->getMessage();
         }
 
+        PaymentEvent::fireDeleteItemsEvent($objectId, $moduleId);
         return true;
     }
 
@@ -790,34 +791,24 @@ class PaymentBase extends ApplicationAbstractBase
         $select = $this->select();
         $select->from(['a' => 'payment_transaction_item'])
             ->columns([
-                'object_id',
                 'title',
                 'cost',
                 'discount',
                 'count',
                 'total' => new Expression('cost * count - discount'),
-                'active',
-                'available',
                 'slug'
             ])
             ->join(
                 ['b' => 'payment_module'],
                 'a.module = b.module',
                 [
-                    'view_controller',
-                    'view_action',
-                    'view_check',
-                    'countable',
-                    'module_extra_options' => 'extra_options',
-                    'handler'
+                    'page_name'
                 ]
             )
             ->join(
                 ['c' => 'application_module'],
                 'b.module = c.id',
-                [
-                    'module_state' => 'status'
-                ]
+                []
             )
             ->where([
                 'transaction_id' => $transactionId

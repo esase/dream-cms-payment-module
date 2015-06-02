@@ -807,7 +807,7 @@ class PaymentBase extends ApplicationAbstractBase
             )
             ->join(
                 ['c' => 'application_module'],
-                'b.module = c.id',
+                new Expression('b.module = c.id and c.status = ?', [self::MODULE_STATUS_ACTIVE]),
                 []
             )
             ->where([

@@ -67,6 +67,20 @@ class PaymentConsoleController extends ApplicationAbstractBaseConsoleController
             }
         }
 
+        // get list of empty transactions
+        $deletedEmptyTransactions = 0;
+        if (null != ($transactions = $this->getModel()->getEmptyTransactions(self::LIMIT_ITEMS))) {
+            // process list of transactions
+            foreach ($transactions as $transaction) {
+                // delete the transaction
+                if (true === ($deleteResult = 
+                        $this->getModel()->deleteTransaction($transaction['id'], 0, 'system'))) {
+
+                    $deletedEmptyTransactions++;
+                }
+            }
+        }
+
         $verbose = $request->getParam('verbose');
 
         if (!$verbose) {
@@ -75,6 +89,7 @@ class PaymentConsoleController extends ApplicationAbstractBaseConsoleController
 
         $longDescription  = $deletedShoppingCartItems . ' items have been deleted from the shopping cart.'. "\n";
         $longDescription .= $deletedTransactions . ' not paid transactions have been deleted.'. "\n";
+        $longDescription .= $deletedEmptyTransactions . ' empty transactions have been deleted.'. "\n";
 
         return $longDescription;
     }

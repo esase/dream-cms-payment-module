@@ -62,4 +62,38 @@ class PaymentConsole extends PaymentBase
 
         return $resultSet->toArray();
     }
+
+    /**
+     * Get all empty transactions
+     *
+     * @param integer $limit
+     * @return array
+     */
+    public function getEmptyTransactions($limit)
+    {
+        $predicate = new Predicate();
+        $select = $this->select();
+        $select->from(['a' => 'payment_transaction_list'])
+            ->columns([
+                'id',
+                'slug'
+            ])
+           ->join(
+                ['b' => 'payment_transaction_item'],
+                'a.id = b.transaction_id',
+                [],
+                'left'
+            )
+            ->where([
+                $predicate->isNull('b.transaction_id')
+            ])
+            ->group('a.id')
+            ->limit($limit);
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        return $resultSet->toArray();
+    }
 }

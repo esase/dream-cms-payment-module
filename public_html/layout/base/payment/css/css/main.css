@@ -10,10 +10,10 @@ div#shopping-cart-wrapper div#shopping-cart-currencies {
   float: right;
 }
 div#shopping-cart-price-wrapper {
-  margin-top:20px;
   text-align: right;
+  margin-top: 20px;
 }
 div#payment-form-wrapper div#payment-amount-wrapper {
   float: right;
-  margin-top:20px;
+  margin-top: 20px;
 }

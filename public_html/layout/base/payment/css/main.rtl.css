@@ -1,13 +1,12 @@
 div#shopping-cart-wrapper {
-  float: left;
-}
-div#shopping-cart-wrapper div#shopping-cart-info {
-  float: left;
-  margin-left: 0;
-  margin-right: 50px;
-}
-div#shopping-cart-wrapper div#shopping-cart-currencies {
-  float: left;
+    left:auto;
+    right:0;
+    -webkit-border-top-right-radius: 0;
+    -moz-border-radius-topright: 0;
+    border-top-right-radius: 0;
+    -webkit-border-top-left-radius: 30px;
+    -moz-border-radius-topleft: 30px;
+    border-top-left-radius: 30px;
 }
 div#shopping-cart-price-wrapper {
   text-align: left;

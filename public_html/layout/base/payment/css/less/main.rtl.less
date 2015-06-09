@@ -2,19 +2,14 @@
 
 // shopping cart wrapper
 div#shopping-cart-wrapper {
-    float: left;
-
-    // cart info
-    div#shopping-cart-info {
-        float:left;
-        margin-left: 0;
-        margin-right: @shopping-cart-info-margin-right;
-    }
-
-    // currencies
-    div#shopping-cart-currencies {
-        float:left;
-    }
+    left:auto;
+    right:0;
+    -webkit-border-top-right-radius: 0;
+    -moz-border-radius-topright: 0;
+    border-top-right-radius: 0;
+    -webkit-border-top-left-radius: @shopping-cart-border-radius;
+    -moz-border-radius-topleft: @shopping-cart-border-radius;
+    border-top-left-radius: @shopping-cart-border-radius;
 }
 
 div#shopping-cart-price-wrapper {

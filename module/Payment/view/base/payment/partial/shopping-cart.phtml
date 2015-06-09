@@ -3,7 +3,7 @@
 <?php $this->exchangeRatesCount = count($this->exchangeRates) ?>
 <?php $this->activeShoppingCartCurrency = $this->paymentCurrency()->getActiveShoppingCartCurrency() ?>
 
-<div id="shopping-cart-wrapper" style="right:0;position: fixed; top: -66px; background-color: rgb(192, 192, 192); padding: 10px; z-index: 1000;">        
+<div id="shopping-cart-wrapper">        
     <div id="shopping-cart-info">
         <h5>
             <b><?php echo $this->translate('Shopping cart') ?></b>
@@ -46,10 +46,55 @@
     <?php endif ?>
     <div class="clearfix"></div>
 </div>
-<script>
-    $( "#shopping-cart-wrapper" ).click(function() {
-        $( "#shopping-cart-wrapper" ).animate({
-            top: 0,
-        });
+<script type="text/javascript">
+    $(document).ready(function() {
+        var $wrapper = $("#shopping-cart-wrapper");
+        var $wrapperHeader = $wrapper.find("#shopping-cart-info");
+        var wrapperHeight = $wrapper.outerHeight(true) - $wrapperHeader.outerHeight(true);
+
+        // set wrapper position
+        $wrapper.css("bottom", -wrapperHeight).show();
+
+        $wrapper.click(function() {
+            if ($(this).hasClass("expandedShoppingCart")) {
+                hideWrapper();
+            }
+            else {        
+                showWrapper();
+            }
+        }); 
+
+        /**
+         * Show wrapper
+         *
+         * @return void
+         */
+        function showWrapper()
+        {
+            $wrapper.find("a").on("click", function(e) {
+                e.preventDefault;
+            });
+
+            $wrapper.animate({
+                bottom: 0
+            }, function() {
+                $(this).addClass("expandedShoppingCart");
+                $wrapper.find("a").unbind();
+            });
+        }
+
+        /**
+         * Hide wrapper
+         * 
+         * @return void
+         */
+        function hideWrapper()
+        {
+            $wrapper.animate({
+                bottom: -wrapperHeight
+            }, function() {
+                $(this).removeClass("expandedShoppingCart");
+            });
+        }
     });
 </script>

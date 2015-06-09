@@ -1,13 +1,21 @@
 @import "common.css";
 div#shopping-cart-wrapper {
-  float: right;
-}
-div#shopping-cart-wrapper div#shopping-cart-info {
-  float: right;
-  margin-left: 50px;
-}
-div#shopping-cart-wrapper div#shopping-cart-currencies {
-  float: right;
+  bottom:1000;
+  dislay:none;
+  cursor:pointer;
+  border:1px solid #ddd;
+  background-color: #f5f5f5;
+  background-image: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+  background-repeat: repeat-x;
+  height:auto;
+  -webkit-border-top-right-radius: 30px;
+  -moz-border-radius-topright: 30px;
+  border-top-right-radius: 30px;
+  width:390px;
+  left:0;
+  position: fixed; 
+  padding: 10px; 
+  z-index: 1000;
 }
 div#shopping-cart-price-wrapper {
   margin-top:20px;

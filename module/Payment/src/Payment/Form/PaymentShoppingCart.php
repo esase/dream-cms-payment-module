@@ -1,4 +1,5 @@
 <?php
+
 namespace Payment\Form;
 
 use Application\Form\ApplicationAbstractCustomForm;
@@ -99,6 +100,33 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
     ];
 
     /**
+     * Extra form elements
+     * @var array
+     */
+    protected $extraFormElements = [];
+
+    /**
+     * Get extra options
+     *
+     * @param array $formData
+     * @param boolean $skipEmptyValues
+     * @return array
+     */
+    public function getExtraOptions(array $formData, $skipEmptyValues = true)
+    {
+        $extraData = [];
+        foreach ($formData as $name => $value) {
+            if (array_key_exists($name, $this->formElements) || ($skipEmptyValues && !$value)) {
+                continue;
+            }
+
+            $extraData[$name] = $value;
+        }
+
+        return $extraData;
+    }
+
+    /**
      * Get form instance
      *
      * @return Application\Form\ApplicationCustomFormBuilder
@@ -157,7 +185,14 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
                 unset($this->formElements['discount']);
             }
 
-            $this->form = new ApplicationCustomFormBuilder($this->formName, $this->formElements,
+            $formElements = $this->formElements;
+
+            // add extra form elements
+            if ($this->extraFormElements) {
+                $formElements = array_merge($formElements, $this->extraFormElements);
+            }
+
+            $this->form = new ApplicationCustomFormBuilder($this->formName, $formElements,
                     $this->translator, $this->ignoredElements, $this->notValidatedElements, $this->method);    
         }
 
@@ -201,6 +236,18 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
             throw new InvalidArgumentException('Tariffs list must not be empty');    
         }
 
+        return $this;
+    }
+
+    /**
+     * Set extra options
+     *
+     * @param array $extraOptions
+     * @return Payment\Form\PaymentShoppingCart fluent interface
+     */
+    public function setExtraOptions(array $extraOptions)
+    {
+        $this->extraFormElements = $extraOptions;
         return $this;
     }
 

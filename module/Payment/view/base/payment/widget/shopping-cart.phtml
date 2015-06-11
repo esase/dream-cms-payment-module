@@ -134,6 +134,12 @@
                             return true;
                         }
 
+                        if ($data['module_extra_options'] == PaymentBaseModel::MODULE_EXTRA_OPTIONS && $paymentHandler->
+                                    getItemExtraOptions($data['object_id'])) {
+
+                            return true;
+                        }
+
                         // check a discount params
                         if ((float) $data['discount']
                                 || $paymentHandler->getDiscount($data['object_id'])) {

@@ -376,6 +376,7 @@ CREATE TABLE IF NOT EXISTS `payment_module` (
     `multi_costs` TINYINT(1) UNSIGNED NOT NULL,
     `must_login` TINYINT(1) UNSIGNED NOT NULL,
     `handler` VARCHAR(100) NOT NULL,
+    `extra_options` TINYINT(1) UNSIGNED DEFAULT NULL,
     PRIMARY KEY (`module`),
     FOREIGN KEY (`module`) REFERENCES `application_module`(`id`)
         ON UPDATE CASCADE
@@ -485,6 +486,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     `discount` DECIMAL(10,2) UNSIGNED NOT NULL,
     `count` SMALLINT(5) UNSIGNED NOT NULL,
     `paid` TINYINT(1) UNSIGNED NOT NULL,
+    `extra_options` TEXT DEFAULT NULL,
     PRIMARY KEY (`object_id`, `module`, `transaction_id`),
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE
@@ -506,6 +508,7 @@ CREATE TABLE IF NOT EXISTS `payment_shopping_cart` (
     `shopping_cart_id` CHAR(32) NOT NULL,
     `date` INT(10) UNSIGNED NOT NULL,
     `language` CHAR(2) NOT NULL,
+    `extra_options` TEXT DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY (`object_id`, `module`, `shopping_cart_id`, `language`),
     KEY `date` (`date`),

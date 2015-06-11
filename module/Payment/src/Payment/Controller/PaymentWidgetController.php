@@ -77,6 +77,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         // extra checks
         if ($itemInfo['countable'] == PaymentBaseModel::MODULE_COUNTABLE
                 || $itemInfo['multi_costs'] == PaymentBaseModel::MODULE_MULTI_COSTS
+                || ($itemInfo['module_extra_options'] == PaymentBaseModel::MODULE_EXTRA_OPTIONS && !empty($extraItemInfo['extra_options']))
                 || (float) $itemInfo['discount']
                 || $paymentHandler->getDiscount($itemInfo['object_id'])) {
 
@@ -99,6 +100,18 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                 'discount' => (float) $itemInfo['discount'] ? 1 : 0
             ]);
 
+            // add extra options in the form
+            if ($itemInfo['module_extra_options'] ==
+                        PaymentBaseModel::MODULE_EXTRA_OPTIONS && !empty($extraItemInfo['extra_options'])) {
+
+                $shoppingCartForm->setExtraOptions($extraItemInfo['extra_options']);
+
+                // fill a default value
+                if ($itemInfo['extra_options']) {
+                    $defaultFormValues = array_merge($defaultFormValues, unserialize($itemInfo['extra_options']));
+                }
+            }
+
             $shoppingCartForm->getForm()->setData($defaultFormValues);
 
             $request = $this->getRequest();
@@ -110,12 +123,16 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                     // get the form's data
                     $formData = $shoppingCartForm->getForm()->getData();
 
+                    // get the item's extra options
+                    $extraOptions = $shoppingCartForm->getExtraOptions($formData);
+
                     $newItemInfo = array(
                         'cost' => !empty($formData['cost']) ? $formData['cost'] : $itemInfo['cost'],
                         'count' => PaymentBaseModel::MODULE_COUNTABLE == $itemInfo['countable'] ? $formData['count'] : 1,
                         'discount'  => !empty($formData['discount'])
                             ? ((float) $itemInfo['discount'] ? (float) $itemInfo['discount'] : (float) $extraItemInfo['discount'])
-                            : 0
+                            : 0,
+                        'extra_options' => $extraOptions ? serialize($extraOptions) : null
                     );
 
                     // update the item into the shopping cart
@@ -365,6 +382,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                     // show an additional shopping cart form
                     if ((float) $objectInfo['discount']
                             || PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']
+                            || (PaymentBaseModel::MODULE_EXTRA_OPTIONS == $moduleInfo['extra_options'] && !empty($objectInfo['extra_options']))
                             || (PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] &&
                                     ($count <= 0 || $count > $objectInfo['count'])))
                     {
@@ -375,6 +393,12 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                             ->hideCountField($moduleInfo['countable'] != PaymentBaseModel::MODULE_COUNTABLE)
                             ->setDiscount((float) $objectInfo['discount'])
                             ->setCountLimit((PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $objectInfo['count'] : 0));
+
+                        if (PaymentBaseModel::MODULE_EXTRA_OPTIONS ==
+                                    $moduleInfo['extra_options'] && !empty($objectInfo['extra_options'])) {
+
+                            $shoppingCartForm->setExtraOptions($objectInfo['extra_options']);
+                        }
 
                         if (PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']) {
                             $shoppingCartForm->setTariffs($objectInfo['cost']);
@@ -389,6 +413,9 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                             if ($shoppingCartForm->getForm()->isValid()) {
                                 $formData = $shoppingCartForm->getForm()->getData();
 
+                                // get the item's extra options
+                                $extraOptions = $shoppingCartForm->getExtraOptions($formData);
+
                                 $itemInfo = [
                                     'object_id'     => $objectId,
                                     'module'        => $moduleInfo['id'],
@@ -396,7 +423,8 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                                     'slug'          => $objectInfo['slug'],
                                     'cost'          => !empty($formData['cost']) ? $formData['cost'] : $objectInfo['cost'],
                                     'discount'      => !empty($formData['discount']) ? (float) $objectInfo['discount'] : 0,
-                                    'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1
+                                    'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1,
+                                    'extra_options' => $extraOptions ? serialize($extraOptions) : null,
                                 ];
 
                                 // add the item into the shopping cart
@@ -420,6 +448,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                             'cost'          => $objectInfo['cost'],
                             'discount'      => 0,
                             'count'         => PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $count : 1,
+                            'extra_options' => null
                         ];
 
                         if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {

@@ -412,7 +412,8 @@ class PaymentWidget extends PaymentBase
                 'object_id',
                 'cost',
                 'discount',
-                'count'
+                'count',
+                'extra_options',
             ])
             ->join(
                 ['b' => 'payment_module'],
@@ -421,6 +422,7 @@ class PaymentWidget extends PaymentBase
                     'module',
                     'countable',
                     'multi_costs',
+                    'module_extra_options' => 'extra_options',
                     'must_login',
                     'handler'
                 ]
@@ -492,7 +494,8 @@ class PaymentWidget extends PaymentBase
                     'countable',
                     'multi_costs',
                     'handler',
-                    'page_name'
+                    'page_name',
+                    'module_extra_options' => 'extra_options'
                 ]
             )
             ->join(
@@ -525,6 +528,7 @@ class PaymentWidget extends PaymentBase
      *      float cost - required
      *      integer|float discount - optional
      *      integer count - required
+     *      string extra_options - optional (serialized array)
      * @return integer|string
      */
     public function addToShoppingCart(array $itemInfo)
@@ -608,6 +612,7 @@ class PaymentWidget extends PaymentBase
                 [
                     'countable',
                     'multi_costs',
+                    'extra_options',
                     'must_login',
                     'handler'
                 ]

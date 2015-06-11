@@ -1,4 +1,5 @@
 <?php
+
 namespace Payment\Model;
 
 use Application\Utility\ApplicationCache as CacheUtility;
@@ -19,7 +20,12 @@ use Zend\Db\Sql\Predicate\Literal as LiteralPredicate;
 use Exception;
 
 class PaymentBase extends ApplicationAbstractBase
-{
+{    
+    /**
+     * Module extra options flag
+     */
+    const MODULE_EXTRA_OPTIONS = 1;
+
     /**
      * Module countable flag
      */

@@ -21,8 +21,35 @@
             'countable',
             'handler',
             'page_name',
-            'slug'
+            'slug',
+            'extra_options',
+            'module_extra_options'
         ],
+        'actions_options' => [
+            'action_identity' => 'object_id'
+        ],
+       'actions' => [
+            [
+                'action' => 'view-options',
+                'name' => $this->translate('View the items extra options'),
+                'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-item-extra-options']) . '?id=__value__\', \'popup-items-extra-options-window\')',
+                'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
+            ]         
+        ],
+        'actions_check' => [
+            'view-options' => [
+                [
+                    'function' => function($data)  
+                    {
+                        if (!$data['extra_options'] || !$data['module_extra_options']) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                ]
+            ]
+        ]
     ])
 ?>
 

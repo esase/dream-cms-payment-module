@@ -291,6 +291,7 @@ class PaymentWidget extends PaymentBase
                         'discount' => $item['discount'],
                         'count' => $item['count'],
                         'paid' => self::TRANSACTION_NOT_PAID,
+                        'extra_options' => !empty($item['extra_options']) ? $item['extra_options'] : null
                     ]);
 
                 $statement = $this->prepareStatementForSqlObject($insert);

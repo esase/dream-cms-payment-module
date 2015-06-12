@@ -3,7 +3,7 @@
 <?php $this->exchangeRatesCount = count($this->exchangeRates) ?>
 <?php $this->activeShoppingCartCurrency = $this->paymentCurrency()->getActiveShoppingCartCurrency() ?>
 
-<div id="shopping-cart-wrapper">        
+<div id="shopping-cart-wrapper" style="visibility: hidden">        
     <div id="shopping-cart-info">
         <h5>
             <b><?php echo $this->translate('Shopping cart') ?></b>
@@ -53,7 +53,7 @@
         var wrapperHeight = $wrapper.outerHeight(true) - $wrapperHeader.outerHeight(true);
 
         // set wrapper position
-        $wrapper.css("bottom", -wrapperHeight).show();
+        $wrapper.css("bottom", -wrapperHeight).css("visibility", "visible");
 
         $wrapper.click(function() {
             if ($(this).hasClass("expandedShoppingCart")) {

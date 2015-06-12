@@ -466,7 +466,8 @@ class PaymentBase extends ApplicationAbstractBase
                 'title',
                 'slug',
                 'discount',
-                'count'
+                'count',
+                'extra_options'
             ])
             ->join(
                 ['b' => 'payment_module'],
@@ -617,7 +618,8 @@ class PaymentBase extends ApplicationAbstractBase
                 'cost',
                 'discount',
                 'count',
-                'slug'
+                'slug',
+                'extra_options'
             ])
             ->join(
                 ['b' => 'payment_module'],
@@ -625,7 +627,8 @@ class PaymentBase extends ApplicationAbstractBase
                 [
                     'countable',
                     'handler',
-                    'page_name'
+                    'page_name',
+                    'module_extra_options' => 'extra_options'
                 ]
             )
             ->join(

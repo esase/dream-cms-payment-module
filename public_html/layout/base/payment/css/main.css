@@ -1,7 +1,5 @@
 @import "common.css";
 div#shopping-cart-wrapper {
-  bottom:1000;
-  dislay:none;
   cursor:pointer;
   border:1px solid #ddd;
   background-color: #f5f5f5;

@@ -17,6 +17,7 @@
             'title' => true
         ],
         'skipped_fields' => [
+            'id',
             'object_id',
             'countable',
             'handler',
@@ -26,12 +27,12 @@
             'module_extra_options'
         ],
         'actions_options' => [
-            'action_identity' => 'object_id'
+            'action_identity' => 'id'
         ],
        'actions' => [
             [
                 'action' => 'view-options',
-                'name' => $this->translate('View the items extra options'),
+                'name' => $this->translate('Extra options'),
                 'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-item-extra-options']) . '?id=__value__\', \'popup-items-extra-options-window\')',
                 'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
             ]         

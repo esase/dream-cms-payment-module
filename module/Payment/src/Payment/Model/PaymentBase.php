@@ -410,6 +410,93 @@ class PaymentBase extends ApplicationAbstractBase
     }
 
     /**
+     * Get a transaction item's extra options
+     *
+     * @param integer $id
+     * @param boolean $userId
+     * @return array
+     */
+    public function getTransactionItemExtraOptions($id, $userId)
+    {
+        $select = $this->select();
+        $select->from(['a' => 'payment_transaction_item'])
+            ->columns([
+                'extra_options'
+            ])
+            ->join(
+                ['b' => 'payment_transaction_list'],
+                new Expression('a.transaction_id = b.id and b.user_id = ?', [$userId]),
+                []
+            )
+            ->where([
+                'a.id' => $id
+            ]);
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        if ($resultSet->current()) {
+            if (!empty($resultSet->current()->extra_options)) {
+                $values = unserialize($resultSet->current()->extra_options);
+                $processedValues = [];
+
+                foreach ($values as $key => $value) {
+                    $processedValues[] = [
+                        'option' => $key,
+                        'value'  => $value
+                    ];
+                }
+
+                return $processedValues;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Get a shopping cart item's extra options
+     *
+     * @param integer $id
+     * @return array
+     */
+    public function getShoppingCartItemExtraOptions($id)
+    {
+        $select = $this->select();
+        $select->from('payment_shopping_cart')
+            ->columns([
+                'extra_options'
+            ])
+            ->where([
+                'id' => $id,
+                'shopping_cart_id' => $this->getShoppingCartId()
+            ]);
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        if ($resultSet->current()) {
+            if (!empty($resultSet->current()->extra_options)) {
+                $values = unserialize($resultSet->current()->extra_options);
+                $processedValues = [];
+
+                foreach ($values as $key => $value) {
+                    $processedValues[] = [
+                        'option' => $key,
+                        'value'  => $value
+                    ];
+                }
+
+                return $processedValues;
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Get discounted items amount
      *
      * @param float $itemsAmount
@@ -613,6 +700,7 @@ class PaymentBase extends ApplicationAbstractBase
         $select = $this->select();
         $select->from(['a' => 'payment_transaction_item'])
             ->columns([
+                'id',
                 'title',
                 'object_id',
                 'cost',

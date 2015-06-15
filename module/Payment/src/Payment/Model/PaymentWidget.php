@@ -486,7 +486,8 @@ class PaymentWidget extends PaymentBase
                 'discount',
                 'count',
                 'total' => new Expression('cost * count - discount'),
-                'slug'
+                'slug',
+                'extra_options'
             ])
             ->join(
                 ['b' => 'payment_module'],

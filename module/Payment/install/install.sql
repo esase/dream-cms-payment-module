@@ -477,6 +477,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
+    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `transaction_id` INT(10) UNSIGNED NOT NULL,
     `object_id` INT(10) UNSIGNED NOT NULL,
     `module` SMALLINT(5) UNSIGNED NOT NULL,
@@ -487,7 +488,8 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_item` (
     `count` SMALLINT(5) UNSIGNED NOT NULL,
     `paid` TINYINT(1) UNSIGNED NOT NULL,
     `extra_options` TEXT DEFAULT NULL,
-    PRIMARY KEY (`object_id`, `module`, `transaction_id`),
+    PRIMARY KEY (`id`),
+    UNIQUE KEY (`object_id`, `module`, `transaction_id`),
     FOREIGN KEY (`transaction_id`) REFERENCES `payment_transaction_list`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,

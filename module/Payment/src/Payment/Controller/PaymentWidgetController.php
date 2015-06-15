@@ -33,6 +33,28 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     }
 
     /**
+     * View an item extra's options
+     */
+    public function ajaxViewItemExtraOptionsAction()
+    {
+        $shoppingCart = $this->params()->fromQuery('shopping_cart', false);
+        $id = $this->params()->fromQuery('id', -1);
+        $userId = UserIdentityService::getCurrentUserIdentity()['user_id'];
+
+        $extraOptions = !$shoppingCart
+            ? $this->getModel()->getTransactionItemExtraOptions($id, $userId)
+            : $this->getModel()->getShoppingCartItemExtraOptions($id);
+
+        if (!$extraOptions) {
+            return $this->createHttpNotFoundModel($this->getResponse());
+        }
+
+        return new ViewModel([
+            'extra_options' => $extraOptions
+        ]);
+    }
+
+    /**
      * View transaction items
      */
     public function ajaxViewTransactionItemsAction()

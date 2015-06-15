@@ -79,6 +79,7 @@
         'handler',
         'page_name',
         'slug',
+        'extra_options',
         'module_extra_options'
     ],
     'helpers' => array(
@@ -107,6 +108,12 @@
         ],
         'single_actions' => [
             [
+                'action' => 'view-options',
+                'name' => $this->translate('Extra options'),
+                'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-item-extra-options']) . '?id=__value__&shopping_cart=true\', \'popup-items-extra-options-window\')',
+                'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
+            ],
+            [
                 'name' => $this->translate('Edit'),
                 'js' => 'payment.getEditItemForm(\'__value__\')',
                 'check_acl' => false,
@@ -124,6 +131,18 @@
     ],
     'actions_extra_check' => [
         'single_actions' => [
+             'view-options' => [
+                [
+                    'function' => function($data)  
+                    {
+                        if (!$data['extra_options'] || !$data['module_extra_options']) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                ]
+            ],
             'edit-item' => [
                 [
                     'function' => function($data) use ($paymentHandlerManager) {

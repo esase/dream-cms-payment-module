@@ -1,0 +1,94 @@
+<?php $this->declareVars('subPageTitle', 'parentPageTitle') ?>
+
+<?php $this->subPageTitle = $this->translate('Edit the coupon') ?>
+<?php $this->parentPageTitle = $this->translate('List of discount coupons') ?>
+
+<?php $this->headTitle($this->subPageTitle) ?>
+<?php $this->headTitle($this->parentPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('payment/payment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'coupons' // selected action is "coupons"
+]) ?>
+
+<!-- render a breadcrumb -->
+<?php echo $this->partial('administration-partial/breadcrumb', [
+    'pages' => [
+        'coupons' => [
+            'name' => $this->parentPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'coupons',
+            'check_acl' => true
+        ],
+        'add_coupon' => [
+            'name' => $this->subPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'edit-coupon',
+            'check_acl' => true
+        ]
+    ]
+]) ?>
+
+<?php $this->extraActions = trim($this->partial('administration-partial/extra-actions', ['pages' => [
+    [
+        'controller' => 'payments-administration',
+        'action' => 'delete-coupons',
+        'name' => $this->translate('Delete the coupon'),
+        'check_acl' => true,
+        'confirm' => $this->translate('Coupon will be deleted. Are you sure?'),
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'coupons' : [{$this->coupon['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'coupons'], ['force_canonical' => true])}'}) }"
+    ],
+    [
+        'controller' => 'payments-administration',
+        'action' => 'add-coupon',
+        'name' => $this->translate('Add a coupon'),
+        'check_acl' => true
+    ]]
+]))
+?>
+
+<!-- notification -->
+<?php echo $this->partial('partial/notification') ?>
+
+<div class="row">
+    <?php if ($this->extraActions): ?>
+        <div class="col-md-4">
+            <?php echo $this->extraActions ?>
+        </div>
+        <div class="col-md-8">
+            <!-- render a form -->
+            <?php echo $this->partial('administration-partial/panel', [
+                'notification' => false,
+                'title' => $this->translate('Editing'),
+                'body' => $this->partial('partial/form', [
+                    'form' => $this->coupon_form,
+                    'controller' => 'payments-administration',
+                    'action' => 'edit-coupon',
+                    'params' => [
+                        'slug' => $this->coupon['id']
+                    ]
+                ])
+            ]) ?>
+        </div>
+    <?php else: ?>
+        <div class="col-md-12">
+            <!-- render a form -->
+            <?php echo $this->partial('administration-partial/panel', [
+                'notification' => false,
+                'title' => $this->translate('Editing'),
+                'body' => $this->partial('partial/form', [
+                    'form' => $this->coupon_form,
+                    'controller' => 'payments-administration',
+                    'action' => 'edit-coupon',
+                    'params' => [
+                        'slug' => $this->coupon['id']
+                    ]
+                ])
+            ]) ?>
+        </div>
+    <?php endif ?>
+</div>

@@ -1,0 +1,63 @@
+<?php $this->declareVars('processedItems') ?>
+<?php 
+    $this->processedItems = $this->partial('partial/table', [
+        'headers' => [
+            'Title',
+            'Unit Price',
+            'Discount',
+            'Count'
+        ],
+        'list' => $this->items,
+        'helpers' => [
+            'cost' => 'paymentProcessCost',
+            'discount' => 'paymentProcessCost',
+            'title' => 'paymentItemLink',
+        ],
+        'helpers_set_array' => [
+            'title' => true
+        ],
+        'skipped_fields' => [
+            'id',
+            'object_id',
+            'countable',
+            'handler',
+            'page_name',
+            'slug',
+            'extra_options',
+            'module_extra_options'
+        ],
+        'actions_options' => [
+            'action_identity' => 'id'
+        ],
+       'actions' => [
+            [
+                'action' => 'view-options',
+                'name' => $this->translate('Extra options'),
+                'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-item-extra-options']) . '?id=__value__\', \'popup-items-extra-options-window\')',
+                'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
+            ]         
+        ],
+        'actions_check' => [
+            'view-options' => [
+                [
+                    'function' => function($data)  
+                    {
+                        if (!$data['extra_options'] || !$data['module_extra_options']) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                ]
+            ]
+        ]
+    ])
+?>
+
+<?php
+    echo $this->partial('partial/popup', [
+        'popup_id' => 'popup-transaction-items-window',
+        'title' => 'Transaction items',
+        'body' => $this->processedItems
+    ])
+?>

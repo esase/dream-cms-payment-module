@@ -1,0 +1,16 @@
+div#shopping-cart-wrapper {
+    left:auto;
+    right:0;
+    -webkit-border-top-right-radius: 0;
+    -moz-border-radius-topright: 0;
+    border-top-right-radius: 0;
+    -webkit-border-top-left-radius: 30px;
+    -moz-border-radius-topleft: 30px;
+    border-top-left-radius: 30px;
+}
+div#shopping-cart-price-wrapper {
+  text-align: left;
+}
+div#payment-form-wrapper div#payment-amount-wrapper {
+  float: left;
+}

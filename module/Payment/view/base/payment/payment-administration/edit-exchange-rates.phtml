@@ -1,0 +1,96 @@
+<?php $this->declareVars('subPageTitle', 'parentPageTitle') ?>
+
+<?php $this->subPageTitle = $this->translate('Exchange rates') ?>
+<?php $this->parentPageTitle = $this->translate('List of currencies') ?>
+
+<?php $this->headTitle($this->subPageTitle) ?>
+<?php $this->headTitle($this->currency['code']) ?>
+<?php $this->headTitle($this->parentPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('payment/payment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'currencies' // selected action is "list"
+]) ?>
+
+<!-- render a breadcrumb -->
+<?php echo $this->partial('administration-partial/breadcrumb', [
+    'pages' => [
+        'currencies' => [
+            'name' => $this->parentPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'currencies',
+            'check_acl' => true
+        ],
+        'exchange_rate' => [
+            'name' => $this->currency['code'] . ' - ' . $this->subPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'exchange-rate',
+            'check_acl' => true
+        ]
+    ]
+]) ?>
+
+<?php $this->extraActions = trim($this->partial('administration-partial/extra-actions', ['pages' => [
+     [
+        'controller' => 'payments-administration',
+        'action' => 'edit-currency',
+        'params' => [
+            'slug' => $this->currency['id']
+        ],
+        'name' => $this->translate('Edit the currency'),
+        'check_acl' => true
+    ],
+    [
+        'controller' => 'payments-administration',
+        'action' => 'add-currency',
+        'name' => $this->translate('Add a currency'),
+        'check_acl' => true
+    ]]
+]))
+?>
+
+<!-- notification -->
+<?php echo $this->partial('partial/notification') ?>
+
+<div class="row">
+    <?php if ($this->extraActions): ?>
+        <div class="col-md-4">
+            <?php echo $this->extraActions ?>
+        </div>
+        <div class="col-md-8">
+            <!-- render a form -->
+            <?php echo $this->partial('administration-partial/panel', [
+                'notification' => false,
+                'title' => $this->translate('Editing'),
+                'body' => $this->partial('partial/form', [
+                    'form' => $this->exchange_form,
+                    'controller' => 'payments-administration',
+                    'action' => 'edit-exchange-rates',
+                    'params' => [
+                        'slug' => $this->currency['id']
+                    ]
+                ])
+            ]) ?>
+        </div>
+    <?php else: ?>
+        <div class="col-md-12">
+            <!-- render a form -->
+            <?php echo $this->partial('administration-partial/panel', [
+                'notification' => false,
+                'title' => $this->translate('Editing'),
+                'body' => $this->partial('partial/form', [
+                    'form' => $this->exchange_form,
+                    'controller' => 'payments-administration',
+                    'action' => 'edit-exchange-rates',
+                    'params' => [
+                        'slug' => $this->currency['id']
+                    ]
+                ])
+            ]) ?>
+        </div>
+    <?php endif ?>
+</div>

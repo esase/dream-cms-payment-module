@@ -1,0 +1,22 @@
+<?php $this->declareVars('processedOptions') ?>
+<?php 
+    $this->processedOptions = $this->partial('partial/table', [
+        'headers' => [
+            'Option',
+            'Value'
+        ],
+        'list' => $this->extra_options,
+        'helpers' => [
+            'option' => 'translate',
+            'value' => 'translate'
+        ],
+    ])
+?>
+
+<?php
+    echo $this->partial('partial/popup', [
+        'popup_id' => 'popup-items-extra-options-window',
+        'title' => 'Extra options',
+        'body' => $this->processedOptions
+    ])
+?>

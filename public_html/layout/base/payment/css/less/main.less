@@ -1,0 +1,37 @@
+@import "common.css";
+@import "variables/main.less";
+
+// shopping cart wrapper
+div#shopping-cart-wrapper {
+    cursor:pointer;
+    border:1px solid @shopping-cart-wrapper-border-color;
+    background-color: @shopping-cart-wrapper-background-color;
+    background-image: linear-gradient(to bottom, @shopping-cart-wrapper-background-image-color-start 0%, @shopping-cart-wrapper-background-image-color-end 100%);
+    background-repeat: repeat-x;
+    height:auto;
+    -webkit-border-top-right-radius: @shopping-cart-wrapper-border-radius;
+    -moz-border-radius-topright: @shopping-cart-wrapper-border-radius;
+    border-top-right-radius: @shopping-cart-wrapper-border-radius;
+    width: @shopping-cart-wrapper-width;
+    left:0;
+    position: fixed; 
+    padding: @shopping-cart-wrapper-padding; 
+    z-index: 1000;
+}
+
+// cart price wrapper
+div#shopping-cart-price-wrapper {
+    text-align: right;
+    margin-top: @shopping-cart-price-wrapper-margin-top;
+}
+
+// payment form wrapper
+div#payment-form-wrapper {
+    div#payment-amount-wrapper {
+        float: right;
+    }
+}
+
+div#payment-form {
+    margin-bottom: @payment-form-margin-bottom;
+]

@@ -1,0 +1,12 @@
+<!-- render a payment form -->
+<?php
+    echo $this->partial('payment/payment-type/_payment-form', [
+        'payments' => $this->payments,
+        'current_payment' => $this->current_payment,
+        'payment_info' => $this->applicationSetting('payment_cash_description'),
+        'amount' => $this->amount,
+        'transaction' => $this->transaction,
+        'payment_options' => $this->payment_options,
+        'payment_url' => $this->payment_url
+    ]);
+?>

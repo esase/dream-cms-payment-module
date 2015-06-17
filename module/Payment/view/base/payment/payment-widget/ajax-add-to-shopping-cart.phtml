@@ -1,0 +1,43 @@
+<?php if ($this->message && !$this->shoppingcart_form): ?>
+
+    <?php $this->placeholder('contentBody')->captureStart() ?>
+        <p><?php echo $this->message ?></p>
+    <?php $this->placeholder('contentBody')->captureEnd() ?>
+
+    <?php $this->placeholder('contentFooter')->captureStart() ?>
+        <a href="<?php echo $this->url('page', ['page_name' => $this->pageUrl('shopping-cart')], ['force_canonical' => true]) ?>" class="btn btn-primary"><?php echo $this->translate('View the shopping cart') ?></a>
+        <?php if ($this->update_shoping_cart) : ?>
+            <script type="text/javascript">
+                payment.updateShoppingCart();
+            </script>
+        <?php endif ?>
+    <?php $this->placeholder('contentFooter')->captureEnd() ?>
+
+<?php else: ?>
+
+    <?php $this->placeholder('contentBody')->captureStart() ?>
+        <?php echo $this->partial('partial/form', [
+            'form' => $this->shoppingcart_form,
+        ]) ?>
+    <?php $this->placeholder('contentBody')->captureEnd() ?>
+
+    <?php $this->placeholder('contentFooter')->captureStart() ?>
+        <button type="button" onclick="payment.sendShoppingCartForm()" class="btn btn-primary"><?php echo $this->translate('Add') ?></button>
+        <script type="text/javascript">
+            $("#popup-shopping-cart-window").find("form:first").bind('submit', function() {
+                payment.sendShoppingCartForm();
+                return false;
+            });
+        </script>
+    <?php $this->placeholder('contentFooter')->captureEnd() ?>
+
+<?php endif ?>
+
+<?php 
+    echo $this->partial('partial/popup', [
+        'popup_id' => 'popup-shopping-cart-window',
+        'title' => 'Add the item to the shopping cart',
+        'body' => $this->placeholder('contentBody'),
+        'footer' => $this->placeholder('contentFooter')
+    ]) 
+?>

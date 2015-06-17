@@ -1,0 +1,115 @@
+<?php use Payment\Model\PaymentBase as PaymentBaseModel ?>
+
+<?php $this->declareVars('subPageTitle', 'content') ?>
+<?php $this->subPageTitle = $this->translate('List of currencies') ?>
+<?php $this->headTitle($this->subPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('payment/payment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'currencies' // selected action is "currencies"
+]) ?>
+
+<!-- render a data grid -->
+<?php $this->content = $this->partial('partial/data-grid', [
+    'controller' => 'payments-administration',
+    'action' => 'currencies',
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'id',
+    'default_order_type' => 'desc',
+    'headers' => [
+        [
+            'title' => $this->translate('ID'),
+            'order_name' => 'id'
+        ],
+        [
+            'title' => $this->translate('Currency code'),
+            'order_name' => 'code'
+        ],
+        [
+            'title' => $this->translate('Currency name')
+        ],
+        [
+            'title' => $this->translate('Primary site currency'),
+            'order_name' => 'primary'
+        ]
+    ],
+    'paginator' => $this->paginator,
+    'helpers' => [
+        'name' => 'translate',
+        'primary' => 'applicationBooleanValue'
+    ],
+    'helpers_options' => [
+    ],
+    'actions' => [
+        'regular_actions' => [
+            [
+                'name' => $this->translate('Add a currency'),
+                'controller' => 'payments-administration',
+                'action' => 'add-currency',
+                'check_acl' => true
+            ]
+        ],
+        'multiple_actions' => [
+            [
+                'name' => $this->translate('Delete selected'),
+                'controller' => 'payments-administration',
+                'action' => 'delete-currencies',
+                'check_acl' => true,
+                'confirm' => $this->translate('Selected currencies will be deleted with all interrelated transactions. Are you sure?')
+            ]
+        ],
+        'single_actions' => [
+            [
+                'name' => $this->translate('Exchange rates'),
+                'controller' => 'payments-administration',
+                'action' => 'edit-exchange-rates',
+                'check_acl' => true,
+                'image' => $this->layoutAsset('icon/exchange_rate_action.png', 'image', 'payment')
+            ],
+            [
+                'name' => $this->translate('Edit the currency'),
+                'controller' => 'payments-administration',
+                'action' => 'edit-currency',
+                'check_acl' => true,
+                'image' => $this->layoutAsset('icon/edit_action.png', 'image')
+            ]
+        ]
+    ],
+    'actions_options' => [
+        'action_identity' => 'id',
+        'form_name' => 'currencies',
+        'multiple_actions' => [
+            'items_name' => 'currencies[]'
+        ]
+    ],
+    'actions_extra_check' => [
+        'multiple_actions' => [
+            'primary_currency' => [
+                'param' => 'primary',
+                'condition' =>  'return (int) "__value__" == "' . PaymentBaseModel::PRIMARY_CURRENCY . '" ? false : true;'
+            ]
+        ],
+        'multiple_actions_message' => $this->translate('You cannot delete the primary site currency'),
+        'single_actions' => [
+            'edit-exchange-rates' => [
+                [
+                    'param' => 'primary',
+                    'condition' =>  'return (int) "__value__" == "' .
+                            PaymentBaseModel::PRIMARY_CURRENCY . '" && (int) "' . $this->paginator->getTotalItemCount() . '" > 1;'
+                ]
+            ]
+        ]
+    ]
+]) ?>
+
+<!-- render a data grid -->
+<?php echo $this->partial('administration-partial/panel', [
+    'title' => $this->translate('Currencies'),
+    'body' => $this->content
+]) ?>

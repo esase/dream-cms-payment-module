@@ -1,0 +1,188 @@
+<?php use Payment\Model\PaymentBase as PaymentBaseModel ?>
+<?php $this->declareVars('regularActions', 'currentPageUrl', 'checkoutPageUrl') ?>
+<?php $this->currentPage = $this->pageUrl('shopping-cart') ?>
+
+<?php
+    // generate list of regular actions
+    if ($this->paymentshoppingCart()->getItemsCount()) {
+        $this->regularActions = new ArrayObject;
+        $this->regularActions = [
+            [
+                'name' => !$this->paymentShoppingCart()->getCurrentDiscount()
+                    ? $this->translate('Enter a discount code')
+                    : $this->translate('Deactivate the discount code'),
+
+                'js' => !$this->paymentShoppingCart()->getCurrentDiscount() 
+                    ? 'payment.getDiscountCouponForm()' 
+                    : 'payment.deactivateDiscountCoupon()'
+            ]
+        ];
+
+        $this->checkoutPageUrl = $this->pageUrl('checkout');
+
+        if (false !== $this->checkoutPageUrl) {
+            $this->regularActions = array_merge($this->regularActions, [
+                [
+                    'name' => $this->translate('Checkout'),
+                    'page_name' => $this->checkoutPageUrl,
+                    'check_acl' => false
+                ]
+            ]);
+        }
+    }
+?>
+
+<!-- render a data grid -->
+<?php echo $this->partial('partial/data-grid', [
+    'page_name' => $this->currentPage,
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'id',
+    'default_order_type' => 'desc',
+    'ajax' => [
+        'wrapper_id' => $this->data_grid_wrapper,
+        'widget_connection' => $this->widget_connection,
+        'widget_position' => $this->widget_position
+    ],
+    'headers' => [
+        [
+            'title' => $this->translate('ID'),
+            'order_name' => 'id'
+        ],
+        [
+            'title' => $this->translate('Title'),
+            'order_name' => 'title'
+        ],
+        [
+            'title' => $this->translate('Unit Price'),
+            'order_name' => 'cost'
+        ],
+        [
+            'title' => $this->translate('Discount'),
+            'order_name' => 'discount'
+        ],
+        [
+            'title' => $this->translate('Count'),
+            'order_name' => 'count'
+        ],
+        [
+            'title' => $this->translate('Total price'),
+            'order_name' => 'total'
+        ]
+    ],
+    'paginator' => $this->paginator,
+    'skipped_fields' => [
+        'object_id',
+        'countable',
+        'multi_costs',
+        'handler',
+        'page_name',
+        'slug',
+        'extra_options',
+        'module_extra_options'
+    ],
+    'helpers' => array(
+        'title' => 'paymentItemLink',
+        'cost' => 'paymentProcessCost',
+        'discount' => 'paymentProcessCost',
+        'total' => 'paymentProcessCost'
+    ),
+    'helpers_set_array' => [
+        'title' => true
+    ],
+    'helpers_options' => [
+    ],
+    'actions' => [
+        'regular_actions' => $this->regularActions,
+        'multiple_actions' => [
+            [
+                'name' => $this->translate('Delete selected'),
+                'page_name' => $this->currentPage,
+                'check_acl' => false,
+                'confirm' => $this->translate('Selected items will be deleted. Are you sure?'),
+                'queries' => [
+                    'action' => 'delete'
+                ]
+            ]
+        ],
+        'single_actions' => [
+            [
+                'action' => 'view-options',
+                'name' => $this->translate('Extra options'),
+                'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'payments-widget', 'action' => 'ajax-view-item-extra-options']) . '?id=__value__&shopping_cart=true\', \'popup-items-extra-options-window\')',
+                'image' => $this->layoutAsset('icon/browse_items.png', 'image', 'payment')
+            ],
+            [
+                'name' => $this->translate('Edit'),
+                'js' => 'payment.getEditItemForm(\'__value__\')',
+                'check_acl' => false,
+                'action' => 'edit-item',
+                'image' => $this->layoutAsset('icon/edit_action.png', 'image')
+            ]
+        ]
+    ],
+    'actions_options' => [
+        'action_identity' => 'id',
+        'form_name' => 'shopping-cart',
+        'multiple_actions' => [
+            'items_name' => 'items[]',
+        ]
+    ],
+    'actions_extra_check' => [
+        'single_actions' => [
+             'view-options' => [
+                [
+                    'function' => function($data)  
+                    {
+                        if (!$data['extra_options'] || !$data['module_extra_options']) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                ]
+            ],
+            'edit-item' => [
+                [
+                    'function' => function($data) use ($paymentHandlerManager) {
+                        $paymentHandler = $paymentHandlerManager->getInstance($data['handler']);
+
+                        if ($data['countable'] == PaymentBaseModel::MODULE_COUNTABLE
+                                || $data['multi_costs'] == PaymentBaseModel::MODULE_MULTI_COSTS) {
+
+                            return true;
+                        }
+
+                        if ($data['module_extra_options'] == PaymentBaseModel::MODULE_EXTRA_OPTIONS && $paymentHandler->
+                                    getItemExtraOptions($data['object_id'])) {
+
+                            return true;
+                        }
+
+                        // check a discount params
+                        if ((float) $data['discount']
+                                || $paymentHandler->getDiscount($data['object_id'])) {
+
+                            return true;
+                        }
+
+                        return false;
+                    }
+                ]
+            ]
+        ]
+    ]
+]) ?>
+
+<?php if ($this->paymentShoppingCart()->getItemsCount()) : ?>
+    <div id="shopping-cart-price-wrapper">
+        <p>
+            <b><?php echo $this->translate('Total price') ?>:</b> 
+            <?php echo $this->escapeHtml($this->paymentProcessCost($this->paymentShoppingCart()->getItemsDiscountedAmount(), true)) ?>
+            <?php if ($this->paymentShoppingCart()->getCurrentDiscount()) : ?>
+                - <?php echo $this->translate('without discount') ?>: <?php echo $this->escapeHtml($this->paymentProcessCost($this->paymentShoppingCart()->getItemsAmount())) ?>
+            <?php endif ?>
+        </p>
+    </div>
+<?php endif ?>

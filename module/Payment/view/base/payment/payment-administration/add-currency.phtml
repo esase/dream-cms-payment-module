@@ -1,0 +1,40 @@
+<?php $this->declareVars('subPageTitle', 'parentPageTitle') ?>
+
+<?php $this->subPageTitle = $this->translate('Add a currency') ?>
+<?php $this->parentPageTitle = $this->translate('List of currencies') ?>
+
+<?php $this->headTitle($this->subPageTitle) ?>
+<?php $this->headTitle($this->parentPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('payment/payment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'currencies' // selected action is "list"
+]) ?>
+
+<!-- render a breadcrumb -->
+<?php echo $this->partial('administration-partial/breadcrumb', [
+    'pages' => [
+        'currencies' => [
+            'name' => $this->parentPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'currencies',
+            'check_acl' => true
+        ],
+        'add_currency' => [
+            'name' => $this->subPageTitle,
+            'controller' => 'payments-administration',
+            'action' => 'add-currency',
+            'check_acl' => true
+        ]
+    ]
+]) ?>
+
+<!-- render a form -->
+<?php echo $this->partial('administration-partial/panel', [
+    'title' => $this->translate('New currency'),
+    'body' => $this->partial('partial/form', ['form' => $this->currency_form])
+]) ?>

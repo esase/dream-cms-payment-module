@@ -1,0 +1,29 @@
+<?php $this->declareVars('content') ?>
+
+<?php $this->content =  $this->partial('partial/form', [
+    'form' => $this->shopping_cart_form
+]) ?>
+
+<?php $this->placeholder('contentFooter')->captureStart() ?>
+    <button type="button" id="popup-shopping-cart-submit" onclick="payment.sendEditItemForm('<?php echo $this->escapeJs($this->id) ?>')" class="btn btn-primary"><?php echo $this->translate('Submit') ?></button>
+    <script type="text/javascript">
+        $("#popup-shopping-cart-window").find("form:first").bind('submit', function() {
+            payment.sendEditItemForm('<?php echo $this->escapeJs($this->id) ?>');
+            return false;
+        });
+
+        <?php if ($this->refresh_page) : ?>
+            payment.hidePopupShopping();
+            payment.refreshPage();
+        <?php endif ?>
+    </script>    
+<?php $this->placeholder('contentFooter')->captureEnd() ?>
+
+<?php 
+    echo $this->partial('partial/popup', [
+        'popup_id' => 'popup-shopping-cart-window',
+        'title' => 'Edit the item',
+        'body' => $this->content,
+        'footer' => $this->placeholder('contentFooter')
+    ]) 
+?>

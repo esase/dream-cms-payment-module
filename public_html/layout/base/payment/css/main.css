@@ -21,5 +21,8 @@ div#shopping-cart-price-wrapper {
 }
 div#payment-form-wrapper div#payment-amount-wrapper {
   float: right;
-  margin-top:20px;
+}
+
+div#payment-form {
+    margin-bottom:20px;
 }

@@ -67,4 +67,16 @@ abstract class PaymentAbstractType implements PaymentTypeInterface
         return $this->getServiceLocator()->get('viewHelperManager')->
                 get('url')-> __invoke('page', ['page_name' => $pageName], ['force_canonical' => true]);
     }
+
+    /**
+     * Get notify url
+     *
+     * @param string $paymentName
+     * @return string
+     */
+    public function getNotifyUrl($paymentName)
+    {
+        return $this->getServiceLocator()->get('viewHelperManager')->get('url')->
+                __invoke('application/page', ['controller' => 'payments', 'action' => 'process', 'slug' => $paymentName], ['force_canonical' => true]);
+    }
 }

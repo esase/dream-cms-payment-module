@@ -20,7 +20,7 @@ class PaymentBuyItemsWidget extends PaymentAbstractWidget
 
         // get a default payment type
         $paymentName = $this->getRequest()->getQuery('payment_name');
-        $currentPayment = key($paymentsTypes);
+        $currentPayment = $transactionInfo['payment_name'];
 
         if ($paymentName && array_key_exists($paymentName, $paymentsTypes)) {
             $currentPayment = $paymentName;

@@ -251,6 +251,41 @@ SET @settingId = (SELECT LAST_INSERT_ID());
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId,  'xxxx', NULL);
 
+INSERT INTO `application_setting_category` (`name`, `module`) VALUES
+('PayPal', @moduleId);
+
+SET @settingCategoryId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('payment_paypal_money_enable', 'Enable PayPal', '', 'checkbox', 0, 23, @settingCategoryId, @moduleId, 0, '', '', '');
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId,  '0', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('payment_paypal_description', 'PayPal description', 'This description will be available on the payment page', 'htmlarea', 1, 24, @settingCategoryId, @moduleId, 1, '', '', '');
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId,  'Your description here (where and how users can buy selected items by PayPal)', NULL),
+(@settingId,  'Ваше описание здесь (где и как пользователи могут купить выбранные товары с помощью PayPal)', 'ru');
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('payment_paypal_email', 'Business email', '', 'email', 1, 25, @settingCategoryId, @moduleId, 0, '', '', '');
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId,  'business@gmail.com', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('paypal_title', 'PayPal title', 'This title will be available on the PayPal payment page', 'text', 1, 26, @settingCategoryId, @moduleId, 1, '', '', '');
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId,  'Pay for selected items and services', NULL),
+(@settingId,  'Купить выбранные товары и услуги', 'ru');
+
 -- system pages and widgets
 
 INSERT INTO `page_system` (`slug`, `title`, `module`, `disable_menu`, `privacy`, `forced_visibility`, `disable_user_menu`, `disable_site_map`, `disable_footer_menu`, `disable_seo`, `disable_xml_map`, `pages_provider`, `dynamic_page`) VALUES
@@ -419,7 +454,8 @@ CREATE TABLE IF NOT EXISTS `payment_type` (
 
 INSERT INTO `payment_type` (`id`, `name`, `description`, `enable_option`, `handler`) VALUES
 (1, 'cash', 'Cash', 'payment_cash_enable', 'Payment\\Type\\PaymentCash'),
-(2, 'rbk-money', 'RBK Money', 'payment_rbk_money_enable', 'Payment\\Type\\PaymentRBKMoney');
+(2, 'rbk-money', 'RBK Money', 'payment_rbk_money_enable', 'Payment\\Type\\PaymentRBKMoney'),
+(3, 'paypal', 'PayPal', 'payment_paypal_money_enable', 'Payment\\Type\\PaymentPayPal');
 
 CREATE TABLE IF NOT EXISTS `payment_discount_cupon` (
     `id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,

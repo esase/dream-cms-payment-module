@@ -57,7 +57,7 @@ class PaymentRBKMoney extends PaymentAbstractType
             'failUrl' => $this->getErrorUrl(),
             'serviceName' => SettingService::getSetting('payment_rbk_money_title'), 
             'language' => LocalizationService::getCurrentLocalization()['language'],
-            'recipientAmount' => $itemsAmount,
+            'recipientAmount' => number_format($itemsAmount, 2),
             'recipientCurrency' => $transactionInfo['currency_code'],
             'user_email' => $transactionInfo['email']
         ];
@@ -106,8 +106,8 @@ class PaymentRBKMoney extends PaymentAbstractType
                         && self::PAYMENT_STATUS_SUCCESS == $this->request->getPost('paymentStatus')) {
 
                 // get transaction info
-                if (null != ($transactionInfo =
-                        $this->model->getTransactionInfo($this->request->getPost('orderId'), true, 0, false))) {
+                if (null != ($transactionInfo = $this->model->
+                        getTransactionInfo($this->request->getPost('orderId'), true, 'slug', true, 0, false))) {
 
                     // check the currency code and amount
                     if ($transactionInfo['currency_code'] == $this->request->getPost('recipientCurrency')

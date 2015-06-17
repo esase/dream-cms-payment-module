@@ -870,6 +870,7 @@ class PaymentBase extends ApplicationAbstractBase
     public function getTransactionItems($transactionId, $page = 1, $perPage = 0, $orderBy = null, $orderType = null)
     {
         $orderFields = [
+            'id',
             'title',
             'cost',
             'discount',
@@ -883,23 +884,26 @@ class PaymentBase extends ApplicationAbstractBase
 
         $orderBy = $orderBy && in_array($orderBy, $orderFields)
             ? $orderBy
-            : 'title';
+            : 'id';
 
         $select = $this->select();
         $select->from(['a' => 'payment_transaction_item'])
             ->columns([
+                'id',
                 'title',
                 'cost',
                 'discount',
                 'count',
                 'total' => new Expression('cost * count - discount'),
-                'slug'
+                'slug',
+                'extra_options'
             ])
             ->join(
                 ['b' => 'payment_module'],
                 'a.module = b.module',
                 [
-                    'page_name'
+                    'page_name',
+                    'module_extra_options' => 'extra_options'
                 ]
             )
             ->join(
@@ -925,10 +929,10 @@ class PaymentBase extends ApplicationAbstractBase
      *
      * @param integer $id
      * @param boolean $onlyNotPaid
-     * @param string $field
+     * @param string  $field
      * @param boolean $onlyPrimaryCurrency
      * @param integer $userId
-     * @param boolean
+     * @param boolean $currentLanguage
      * @return array
      */
     public function getTransactionInfo($id, $onlyNotPaid = true,

@@ -2,7 +2,7 @@
 
 return [
     'compatable' => '2.2.4',
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'vendor' => 'eSASe',
     'vendor_email' => 'alexermashev@gmail.com',
     'description' => 'The module allows you to shop on the site',

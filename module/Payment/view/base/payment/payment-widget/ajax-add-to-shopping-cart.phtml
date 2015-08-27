@@ -5,7 +5,7 @@
     <?php $this->placeholder('contentBody')->captureEnd() ?>
 
     <?php $this->placeholder('contentFooter')->captureStart() ?>
-        <a href="<?php echo $this->url('page', ['page_name' => $this->pageUrl('shopping-cart')], ['force_canonical' => true]) ?>" class="btn btn-primary"><?php echo $this->translate('View the shopping cart') ?></a>
+        <a href="<?php echo $this->url('page', ['page_name' => $this->pageUrl('shopping-cart')], ['force_canonical' => true]) ?>" class="btn btn-default"><?php echo $this->translate('View the shopping cart') ?></a>
         <?php if ($this->update_shoping_cart) : ?>
             <script type="text/javascript">
                 payment.updateShoppingCart();
@@ -22,7 +22,7 @@
     <?php $this->placeholder('contentBody')->captureEnd() ?>
 
     <?php $this->placeholder('contentFooter')->captureStart() ?>
-        <button type="button" onclick="payment.sendShoppingCartForm()" class="btn btn-primary"><?php echo $this->translate('Add') ?></button>
+        <button type="button" onclick="payment.sendShoppingCartForm()" class="btn btn-default"><?php echo $this->translate('Add') ?></button>
         <script type="text/javascript">
             $("#popup-shopping-cart-window").find("form:first").bind('submit', function() {
                 payment.sendShoppingCartForm();

@@ -1,4 +1,4 @@
-<?php use Payment\Model\PaymentBase as PaymentBaseModel  ?>
+<?php use Payment\Model\PaymentBase as PaymentBaseModel;  ?>
 
 <?php $this->declareVars('subPageTitle', 'parentPageTitle', 'content') ?>
 
@@ -113,7 +113,7 @@
         ],
         'discount' => [
             'discount' => 'Discount',
-            'discount_value' => ($this->transaction['discount_cupon'] ? $this->transaction['discount_cupon'] . '%' : '')
+            'discount_value' => ($this->transaction['discount_coupon'] ? $this->transaction['discount_coupon'] . '%' : '')
         ],
         'amount' => [
             'total_amount' => 'Total amount',

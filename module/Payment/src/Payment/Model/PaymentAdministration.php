@@ -1,4 +1,25 @@
 <?php
+
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Payment\Model;
 
 use Payment\Event\PaymentEvent;
@@ -25,7 +46,7 @@ class PaymentAdministration extends PaymentBase
      *      integer paid
      *      string email
      *      string date
-     * @return Zend\Paginator\Paginator
+     * @return \Zend\Paginator\Paginator
      */
     public function getTransactionsList($page = 1, $perPage = 0, $orderBy = null, $orderType = null, array $filters = [])
     {
@@ -94,8 +115,8 @@ class PaymentAdministration extends PaymentBase
                 []
             )
             ->join(
-                ['i' => 'payment_discount_cupon'],
-                'a.discount_cupon = i.id',
+                ['i' => 'payment_discount_coupon'],
+                'a.discount_coupon = i.id',
                 [],
                 'left'
             )
@@ -147,7 +168,7 @@ class PaymentAdministration extends PaymentBase
      * @param integer $perPage
      * @param string $orderBy
      * @param string $orderType
-     * @return Paginator
+     * @return \Zend\Paginator\Paginator
      */
     public function getCurrencies($page = 1, $perPage = 0, $orderBy = null, $orderType = null)
     {
@@ -194,8 +215,6 @@ class PaymentAdministration extends PaymentBase
      */
     public function addCurrency(array $currencyInfo)
     {
-        $insertId = 0;
-
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
@@ -229,6 +248,7 @@ class PaymentAdministration extends PaymentBase
 
         // fire the add payment currency event
         PaymentEvent::fireAddPaymentCurrencyEvent($insertId);
+
         return $insertId;
     }
 
@@ -258,7 +278,7 @@ class PaymentAdministration extends PaymentBase
     /**
      * Clear exchange rates
      *
-     * @return integer
+     * @return boolean
      */
     protected function clearExchangeRates()
     {
@@ -320,6 +340,7 @@ class PaymentAdministration extends PaymentBase
         if ($result->count()) {
             // fire the delete payment currency event
             PaymentEvent::fireDeletePaymentCurrencyEvent($currencyId);
+
             return true;
         }
 
@@ -397,6 +418,7 @@ class PaymentAdministration extends PaymentBase
 
         // fire the edit payment currency event
         PaymentEvent::fireEditPaymentCurrencyEvent($oldCurrencyInfo['id']);
+
         return true;
     }
 
@@ -413,7 +435,7 @@ class PaymentAdministration extends PaymentBase
      *      integer used
      *      integer start
      *      integer end
-     * @return Paginator
+     * @return \Zend\Paginator\Paginator
      */
     public function getCoupons($page = 1, $perPage = 0, $orderBy = null, $orderType = null, array $filters = [])
     {
@@ -435,7 +457,7 @@ class PaymentAdministration extends PaymentBase
             : 'id';
 
         $select = $this->select();
-        $select->from('payment_discount_cupon')
+        $select->from('payment_discount_coupon')
             ->columns([
                 'id',
                 'slug',
@@ -501,7 +523,7 @@ class PaymentAdministration extends PaymentBase
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
             $delete = $this->delete()
-                ->from('payment_discount_cupon')
+                ->from('payment_discount_coupon')
                 ->where([
                     'id' => $couponId
                 ]);
@@ -521,6 +543,7 @@ class PaymentAdministration extends PaymentBase
         if ($result->count()) {
             // fire the  delete discount coupon event
             PaymentEvent::fireDeleteDiscountCouponEvent($couponId);
+
             return true;
         }
 
@@ -538,8 +561,6 @@ class PaymentAdministration extends PaymentBase
      */
     public function addCoupon(array $couponInfo)
     {
-        $insertId = 0;
-
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
@@ -552,28 +573,28 @@ class PaymentAdministration extends PaymentBase
             }
 
             $insert = $this->insert()
-                ->into('payment_discount_cupon')
+                ->into('payment_discount_coupon')
                 ->values(array_merge($couponInfo, [
                     'used' => self::COUPON_NOT_USED
                 ]));
 
             $statement = $this->prepareStatementForSqlObject($insert);
-            $result = $statement->execute();
+            $statement->execute();
             $insertId = $this->adapter->getDriver()->getLastGeneratedValue();
 
             // generate a random slug
             $update = $this->update()
-                ->table('payment_discount_cupon')
+                ->table('payment_discount_coupon')
                 ->set([
                     'slug' => strtoupper($this->generateSlug($insertId, $this->
-                            generateRandString(self::COUPON_MIN_SLUG_LENGTH, self::ALLOWED_SLUG_CHARS), 'payment_discount_cupon', 'id'))
+                            generateRandString(self::COUPON_MIN_SLUG_LENGTH, self::ALLOWED_SLUG_CHARS), 'payment_discount_coupon', 'id'))
                 ])
                 ->where([
                     'id' => $insertId
                 ]);
 
             $statement = $this->prepareStatementForSqlObject($update);
-            $result = $statement->execute();
+            $statement->execute();
 
             $this->adapter->getDriver()->getConnection()->commit();
         }
@@ -586,6 +607,7 @@ class PaymentAdministration extends PaymentBase
 
         // fire the add discount coupon event
         PaymentEvent::fireAddDiscountCouponEvent($insertId);
+
         return $insertId;
     }
 
@@ -613,7 +635,7 @@ class PaymentAdministration extends PaymentBase
             }
 
             $update = $this->update()
-                ->table('payment_discount_cupon')
+                ->table('payment_discount_coupon')
                 ->set($couponInfo)
                 ->where([
                     'id' => $id
@@ -633,6 +655,7 @@ class PaymentAdministration extends PaymentBase
 
         // fire the edit discount coupon event
         PaymentEvent::fireEditDiscountCouponEvent($id);
+
         return true;
     }
 
@@ -686,6 +709,7 @@ class PaymentAdministration extends PaymentBase
 
         // fire the edit exchange rates event
         PaymentEvent::fireEditExchangeRatesEvent($currencyId);
+
         return true;
     }
 }

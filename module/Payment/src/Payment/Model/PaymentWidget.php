@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Payment\Model;
 
 use User\Model\UserBase as UserBaseModel;
@@ -18,6 +38,7 @@ class PaymentWidget extends PaymentBase
 {   
     /**
      * Payments types
+     *
      * @var array
      */
     protected static $paymentsTypes = [];
@@ -59,6 +80,7 @@ class PaymentWidget extends PaymentBase
 
         // fire hide payment transaction event
         PaymentEvent::fireHidePaymentTransactionEvent($transactionId);
+
         return true;
     }
 
@@ -74,7 +96,7 @@ class PaymentWidget extends PaymentBase
      *      string filter_slug
      *      integer filter_paid
      *      string filter_date
-     * @return Zend\Paginator\Paginator
+     * @return \Zend\Paginator\Paginator
      */
     public function getUserTransactions($userId, $page = 1, $perPage = 0, $orderBy = null, $orderType = null, array $filters = [])
     {
@@ -143,8 +165,8 @@ class PaymentWidget extends PaymentBase
                 []
             )
             ->join(
-                ['i' => 'payment_discount_cupon'],
-                'a.discount_cupon = i.id',
+                ['i' => 'payment_discount_coupon'],
+                'a.discount_coupon = i.id',
                 [],
                 'left'
             )
@@ -213,8 +235,6 @@ class PaymentWidget extends PaymentBase
      */
     public function addTransaction($userId, array $transactionInfo, array $items)
     {
-        $transactionId = 0;
-
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
@@ -233,7 +253,7 @@ class PaymentWidget extends PaymentBase
 
             // add the discount id
             if (PaymentService::getDiscountCouponInfo()) {
-                $basicData['discount_cupon'] = PaymentService::getDiscountCouponInfo()['id'];    
+                $basicData['discount_coupon'] = PaymentService::getDiscountCouponInfo()['id'];    
             }
 
             if (!$transactionInfo['comments']) {
@@ -265,7 +285,7 @@ class PaymentWidget extends PaymentBase
             // update the discount coupon info
             if (PaymentService::getDiscountCouponInfo()) {
                 $update = $this->update()
-                    ->table('payment_discount_cupon')
+                    ->table('payment_discount_coupon')
                     ->set([
                         'used' => self::COUPON_USED
                     ])
@@ -309,6 +329,7 @@ class PaymentWidget extends PaymentBase
 
         // fire the add payment transaction event
         PaymentEvent::fireAddPaymentTransactionEvent($transactionId, $transactionInfo);
+
         return $transactionId;
     }
 
@@ -394,6 +415,7 @@ class PaymentWidget extends PaymentBase
 
         // fire the edit item into shopping cart event
         PaymentEvent::fireEditItemIntoShoppingCartEvent($id);
+
         return true;
     }
 
@@ -455,7 +477,7 @@ class PaymentWidget extends PaymentBase
      * @param integer $perPage
      * @param string $orderBy
      * @param string $orderType
-     * @return Zend\Paginator\Paginator
+     * @return \Zend\Paginator\Paginator
      */
     public function getShoppingCartItems($page = 1, $perPage = 0, $orderBy = null, $orderType = null)
     {
@@ -535,8 +557,6 @@ class PaymentWidget extends PaymentBase
      */
     public function addToShoppingCart(array $itemInfo)
     {
-        $insertId = 0;
-
         try {
             $this->adapter->getDriver()->getConnection()->beginTransaction();
 
@@ -563,6 +583,7 @@ class PaymentWidget extends PaymentBase
 
         // fire the add item to shopping cart event
         PaymentEvent::fireAddItemToShoppingCartEvent($insertId);
+
         return $insertId;
     }
 

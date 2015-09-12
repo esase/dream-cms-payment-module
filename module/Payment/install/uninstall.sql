@@ -5,4 +5,4 @@ DROP TABLE IF EXISTS `payment_exchange_rate`;
 DROP TABLE IF EXISTS `payment_transaction_list`;
 DROP TABLE IF EXISTS `payment_currency`;
 DROP TABLE IF EXISTS `payment_type`;
-DROP TABLE IF EXISTS `payment_discount_cupon`;
+DROP TABLE IF EXISTS `payment_discount_coupon`;

@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Payment\Controller;
 
 use User\Service\UserIdentity as UserIdentityService;
@@ -14,12 +34,15 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
 {
     /**
      * Model instance
-     * @var object  
+     *
+     * @var \Payment\Model\PaymentWidget
      */
     protected $model;
 
     /**
      * Get model
+     *
+     * @return \Payment\Model\PaymentWidget
      */
     protected function getModel()
     {
@@ -55,16 +78,16 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     }
 
     /**
-     * View transaction items
+     * View transaction's items
      */
     public function ajaxViewTransactionItemsAction()
     {
-        $transasctionId = $this->params()->fromQuery('id', -1);
+        $transactionId = $this->params()->fromQuery('id', -1);
         $userId = UserIdentityService::getCurrentUserIdentity()['user_id'];
 
-        // get transaction items list
+        // get transaction's items
         if (null == ($items = $this->
-                getModel()->getAllTransactionItems($transasctionId, $userId, true))) {
+                getModel()->getAllTransactionItems($transactionId, $userId, true))) {
 
             return $this->createHttpNotFoundModel($this->getResponse());
         }
@@ -275,7 +298,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
      *      float cost - required
      *      float discount - optional
      *      integer count - required
-     * @param Payment\Handler\PaymentInterfaceHandler $paymentHandler
+     * @param \Payment\Handler\PaymentInterfaceHandler $paymentHandler
      * @return boolean
      */
     protected function addToShoppingCart($itemInfo, PaymentInterfaceHandler $paymentHandler)
@@ -284,7 +307,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         if (null != ($itemId = $this->
                 getModel()->inShoppingCart($itemInfo['object_id'], $itemInfo['module']))) {
 
-            // delete old item
+            // delete an old item
             $this->getModel()->deleteFromShoppingCart($itemId);
         }
 
@@ -340,6 +363,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     public function ajaxChangeCurrencyAction()
     {
         $this->getModel()->setShoppingCartCurrency($this->params()->fromPost('currency'));
+
         return $this->getResponse();
     }
 
@@ -375,7 +399,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         $count    = (int) $this->params()->fromPost('count', 0);
 
         $shoppingCartForm  = $message = null;
-        $updateShopingCart = false;
+        $updateShoppingCart = false;
 
         // get a payment module info 
         if (null == ($moduleInfo = $this->getModel()->getPaymentModuleInfo($module))) {
@@ -452,7 +476,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                                 // add the item into the shopping cart
                                 $shoppingCartForm = null;
                                 if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
-                                    $updateShopingCart = true;
+                                    $updateShoppingCart = true;
                                     $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
                                 }
                                 else {
@@ -474,7 +498,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                         ];
 
                         if (true === ($result = $this->addToShoppingCart($itemInfo, $paymentHandler))) {
-                            $updateShopingCart = true;
+                            $updateShoppingCart = true;
                             $message = $this->getTranslator()->translate('Item has been added to your shopping cart');
                         }
                         else {
@@ -486,8 +510,8 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         }
 
         $view = new ViewModel([
-            'update_shoping_cart' => $updateShopingCart,
-            'shoppingcart_form' => $shoppingCartForm ? $shoppingCartForm->getForm() : null,
+            'update_shopping_cart' => $updateShoppingCart,
+            'shopping_cart_form' => $shoppingCartForm ? $shoppingCartForm->getForm() : null,
             'message' => $message
         ]);
 

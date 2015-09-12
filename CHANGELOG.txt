@@ -1,4 +1,5 @@
 Payment 1.0.2, Sep 12, 2015
 ====================================
 
+- fixed a strict standards notice in the shopping cart
 - added a license info into each file;

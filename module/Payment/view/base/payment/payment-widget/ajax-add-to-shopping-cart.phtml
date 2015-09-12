@@ -6,7 +6,7 @@
 
     <?php $this->placeholder('contentFooter')->captureStart() ?>
         <a href="<?php echo $this->url('page', ['page_name' => $this->pageUrl('shopping-cart')], ['force_canonical' => true]) ?>" class="btn btn-default"><?php echo $this->translate('View the shopping cart') ?></a>
-        <?php if ($this->update_shoping_cart) : ?>
+        <?php if ($this->update_shopping_cart) : ?>
             <script type="text/javascript">
                 payment.updateShoppingCart();
             </script>
@@ -17,7 +17,7 @@
 
     <?php $this->placeholder('contentBody')->captureStart() ?>
         <?php echo $this->partial('partial/form', [
-            'form' => $this->shoppingcart_form,
+            'form' => $this->shopping_cart_form,
         ]) ?>
     <?php $this->placeholder('contentBody')->captureEnd() ?>
 

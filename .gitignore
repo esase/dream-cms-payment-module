@@ -1,5 +1,6 @@
 /*
 !.gitignore
+!CHANGELOG.txt
 !/module
 /module/*
 !/module/Payment

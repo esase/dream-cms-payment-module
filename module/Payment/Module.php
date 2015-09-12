@@ -1,9 +1,28 @@
 <?php
 
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Payment;
 
 use Payment\Event\PaymentEvent;
-
 use Zend\ModuleManager\ModuleManagerInterface;
 use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
 use Zend\Console\Adapter\AdapterInterface as Console;
@@ -14,14 +33,15 @@ class Module implements ConsoleUsageProviderInterface
 {
     /**
      * Service manager
-     * @var object
+     *
+     * @var \Zend\ServiceManager\ServiceManager
      */
     public $serviceManager;
 
     /**
      * Init
      *
-     * @param Zend\ModuleManager\ModuleManagerInterface $moduleManager
+     * @param \Zend\ModuleManager\ModuleManagerInterface $moduleManager
      */
     public function init(ModuleManagerInterface $moduleManager)
     {
@@ -29,13 +49,13 @@ class Module implements ConsoleUsageProviderInterface
         $this->serviceManager = $moduleManager->getEvent()->getParam('ServiceManager');
 
         $moduleManager->getEventManager()->
-            attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'initPaymentListeners'));
+                attach(ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'initPaymentListeners'));
     }
 
     /**
      * Init payment listeners
      *
-     * @param Zend\EventManager\EventInterface $e 
+     * @param \Zend\EventManager\EventInterface $e
      */
     public function initPaymentListeners(EventInterface $e)
     {
@@ -55,15 +75,15 @@ class Module implements ConsoleUsageProviderInterface
                     ->getInstance($module->handler);
 
                 // update items
-                $eventManager->attach($module->update_event, function ($e) 
-                        use ($model, $paymentHandler, $module) {
+                $eventManager->attach($module->update_event,
+                        function ($e) use ($model, $paymentHandler, $module) {
 
                     $model->updateItemGlobally($e->getParam('object_id'), $paymentHandler, $module);
                 });
 
                 // delete items
-                $eventManager->attach($module->delete_event, function ($e) 
-                        use ($model, $module) {
+                $eventManager->attach($module->delete_event,
+                        function ($e) use ($model, $module) {
 
                     $model->deleteItemGlobally($e->getParam('object_id'), $module->module);
                 });
@@ -72,7 +92,7 @@ class Module implements ConsoleUsageProviderInterface
     }
 
     /**
-     * Return autoloader config array
+     * Return auto loader config array
      *
      * @return array
      */
@@ -110,13 +130,15 @@ class Module implements ConsoleUsageProviderInterface
                 'Payment\Handler\PaymentHandlerManager' => function($serviceManager)
                 {
                     return new Handler\PaymentHandlerManager($serviceManager);
-                },
+                }
             ]
         ];
     }
 
     /**
      * Init view helpers
+     *
+     * @return array
      */
     public function getViewHelperConfig()
     {
@@ -145,7 +167,7 @@ class Module implements ConsoleUsageProviderInterface
     /**
      * Return path to config file
      *
-     * @return boolean
+     * @return array
      */
     public function getConfig()
     {
@@ -155,7 +177,7 @@ class Module implements ConsoleUsageProviderInterface
     /**
      * Get console usage info
      *
-     * @param Zend\Console\Adapter\AdapterInterface $console
+     * @param \Zend\Console\Adapter\AdapterInterface $console
      * @return array
      */
     public function getConsoleUsage(Console $console)

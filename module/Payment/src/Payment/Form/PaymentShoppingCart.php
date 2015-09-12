@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Payment\Form;
 
 use Application\Form\ApplicationAbstractCustomForm;
@@ -16,48 +36,56 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
 
     /**
      * Form name
+     *
      * @var string
      */
     protected $formName = 'shopping-cart';
 
     /**
      * Object Id
+     *
      * @var integer
      */
     protected $objectId;
 
     /**
      * Module name
+     *
      * @var string
      */
     protected $moduleName;
 
     /**
      * Hide count field
+     *
      * @var boolean
      */
     protected $hideCountField;
 
     /**
      * Discount
+     *
      * @var integer
      */
     protected $discount;
 
     /**
      * Tariffs
+     *
      * @var array
      */
     protected $tariffs;
 
     /**
      * Count limit
+     *
      * @var integer
      */
     protected $countLimit;
 
     /**
      * Form elements
+     *
      * @var array
      */
     protected $formElements = [
@@ -101,6 +129,7 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
 
     /**
      * Extra form elements
+     *
      * @var array
      */
     protected $extraFormElements = [];
@@ -129,7 +158,7 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
     /**
      * Get form instance
      *
-     * @return Application\Form\ApplicationCustomFormBuilder
+     * @return \Application\Form\ApplicationCustomFormBuilder
      */
     public function getForm()
     {
@@ -203,11 +232,12 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
      * Set count limit
      *
      * @param integer $limit
-     * @return Payment\Form\PaymentShoppingCart fluent interface
+     * @return \Payment\Form\PaymentShoppingCart
      */
     public function setCountLimit($limit)
     {
         $this->countLimit = $limit;
+
         return $this;
     }
 
@@ -215,11 +245,12 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
      * Set discount
      *
      * @param integer $discount
-     * @return Payment\Form\PaymentShoppingCart fluent interface
+     * @return \Payment\Form\PaymentShoppingCart
      */
     public function setDiscount($discount)
     {
         $this->discount = $discount;
+
         return $this;
     }
 
@@ -227,8 +258,8 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
      * Set tariffs
      *
      * @param array $tariffs
-     * @throws Zend\Form\Exception\InvalidArgumentException
-     * @return Payment\Form\PaymentShoppingCart fluent interface
+     * @throws \Zend\Form\Exception\InvalidArgumentException
+     * @return \Payment\Form\PaymentShoppingCart
      */
     public function setTariffs(array $tariffs)
     {
@@ -243,11 +274,12 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
      * Set extra options
      *
      * @param array $extraOptions
-     * @return Payment\Form\PaymentShoppingCart fluent interface
+     * @return \Payment\Form\PaymentShoppingCart
      */
     public function setExtraOptions(array $extraOptions)
     {
         $this->extraFormElements = $extraOptions;
+
         return $this;
     }
 
@@ -255,11 +287,12 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
      * Hide count field
      *
      * @param boolean $hide
-     * @return Payment\Form\PaymentShoppingCart fluent interface
+     * @return \Payment\Form\PaymentShoppingCart
      */
     public function hideCountField($hide)
     {
         $this->hideCountField = $hide;
+
         return $this;
     }
 

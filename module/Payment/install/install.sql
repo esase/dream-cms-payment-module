@@ -457,7 +457,7 @@ INSERT INTO `payment_type` (`id`, `name`, `description`, `enable_option`, `handl
 (2, 'rbk-money', 'RBK Money', 'payment_rbk_money_enable', 'Payment\\Type\\PaymentRBKMoney'),
 (3, 'paypal', 'PayPal', 'payment_paypal_money_enable', 'Payment\\Type\\PaymentPayPal');
 
-CREATE TABLE IF NOT EXISTS `payment_discount_cupon` (
+CREATE TABLE IF NOT EXISTS `payment_discount_coupon` (
     `id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
     `slug` VARCHAR(50) DEFAULT NULL,
     `discount` DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
@@ -486,7 +486,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     `currency` TINYINT(3) UNSIGNED NOT NULL,
     `payment_type` TINYINT(3) UNSIGNED DEFAULT NULL,
     `comments` text DEFAULT NULL,
-    `discount_cupon` SMALLINT(5) UNSIGNED DEFAULT NULL,
+    `discount_coupon` SMALLINT(5) UNSIGNED DEFAULT NULL,
     `user_hidden` TINYINT(1) UNSIGNED NOT NULL,
     `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
@@ -504,7 +504,7 @@ CREATE TABLE IF NOT EXISTS `payment_transaction_list` (
     FOREIGN KEY (`payment_type`) REFERENCES `payment_type`(`id`)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    FOREIGN KEY (`discount_cupon`) REFERENCES `payment_discount_cupon`(`id`)
+    FOREIGN KEY (`discount_coupon`) REFERENCES `payment_discount_coupon`(`id`)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
     FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)

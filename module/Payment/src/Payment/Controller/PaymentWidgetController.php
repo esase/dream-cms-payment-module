@@ -93,6 +93,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
         }
 
         return new ViewModel([
+            'transaction' => $this->getModel()->getTransactionInfo($transactionId, false, 'id', false),
             'items' => $items
         ]);
     }

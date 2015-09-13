@@ -80,14 +80,24 @@
         'module_extra_options'
     ],
     'helpers' => [
-        'cost' => 'paymentProcessCost',
-        'discount' => 'paymentProcessCost',
+        'cost' => 'paymentCostFormat',
+        'discount' => 'paymentCostFormat',
+        'total' => 'paymentCostFormat',
         'title' => 'paymentItemLink'
     ],
     'helpers_set_array' => [
         'title' => true
     ],
     'helpers_options' => [
+        'cost' => [
+            'currency' => $this->transaction['currency_code']
+        ],
+        'discount' => [
+            'currency' => $this->transaction['currency_code']
+        ],
+        'total' => [
+            'currency' => $this->transaction['currency_code']
+        ]
     ],
     'actions' => [
         'regular_actions' => [  

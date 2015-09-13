@@ -9,12 +9,20 @@
         ],
         'list' => $this->items,
         'helpers' => [
-            'cost' => 'paymentProcessCost',
-            'discount' => 'paymentProcessCost',
-            'title' => 'paymentItemLink',
+            'cost' => 'paymentCostFormat',
+            'discount' => 'paymentCostFormat',
+            'title' => 'paymentItemLink'
         ],
         'helpers_set_array' => [
             'title' => true
+        ],
+        'helpers_options' => [
+            'cost' => [
+                'currency' => $this->transaction['currency_code']
+            ],
+            'discount' => [
+                'currency' => $this->transaction['currency_code']
+            ]
         ],
         'skipped_fields' => [
             'id',
@@ -24,7 +32,8 @@
             'page_name',
             'slug',
             'extra_options',
-            'module_extra_options'
+            'module_extra_options',
+            'currency'
         ],
         'actions_options' => [
             'action_identity' => 'id'

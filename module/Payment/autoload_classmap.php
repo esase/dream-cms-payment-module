@@ -63,6 +63,7 @@ return [
     'Payment\View\Widget\PaymentShoppingCartInfoWidget'     => __DIR__ . '/src/Payment/View/Widget/PaymentShoppingCartInfoWidget.php',
     'Payment\View\Helper\PaymentShoppingCart'               => __DIR__ . '/src/Payment/View/Helper/PaymentShoppingCart.php',
     'Payment\View\Helper\PaymentCostFormat'                 => __DIR__ . '/src/Payment/View/Helper/PaymentCostFormat.php',
+    'Payment\View\Helper\PaymentDiscountFormat'             => __DIR__ . '/src/Payment/View/Helper/PaymentDiscountFormat.php',
     'Payment\View\Helper\PaymentCurrency'                   => __DIR__ . '/src/Payment/View/Helper/PaymentCurrency.php',
     'Payment\View\Helper\PaymentProcessCost'                => __DIR__ . '/src/Payment/View/Helper/PaymentProcessCost.php',
     'Payment\View\Helper\PaymentItemLink'                   => __DIR__ . '/src/Payment/View/Helper/PaymentItemLink.php',

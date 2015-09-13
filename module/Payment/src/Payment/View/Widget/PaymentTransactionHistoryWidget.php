@@ -75,8 +75,8 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
         $filterForm->getForm()->setData($request->getQuery(), false);
 
         // validate the filter form
-        if ($this->getView()->
-                applicationRoute()->getQueryParam('form_name') == $filterForm->getFormName()) {
+        if ($this->getRequest()->isXmlHttpRequest()
+                || $this->getView()->applicationRoute()->getQueryParam('form_name') == $filterForm->getFormName()) {
 
             // check the filter form validation
             if ($filterForm->getForm()->isValid()) {

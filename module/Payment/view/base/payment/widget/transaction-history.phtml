@@ -65,6 +65,10 @@
         [
             'title' => $this->translate('Date'),
             'order_name' => 'date'
+        ],
+        [
+            'title' => $this->translate('Discount'),
+            'order_name' => 'discount'
         ]
     ],
     'filter_form' => $this->filter_form,
@@ -78,6 +82,7 @@
         'cost' => 'paymentCostFormat',
         'date' => 'applicationDate',
         'payment' => 'translate',
+        'discount' => 'paymentDiscountFormat'
     ],
     'helpers_set_array' => [
         'cost' => true

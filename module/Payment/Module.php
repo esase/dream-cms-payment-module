@@ -157,7 +157,8 @@ class Module implements ConsoleUsageProviderInterface
                 'paymentCurrency' => 'Payment\View\Helper\PaymentCurrency',
                 'paymentShoppingCart' => 'Payment\View\Helper\PaymentShoppingCart',
                 'paymentProcessCost' => 'Payment\View\Helper\PaymentProcessCost',
-                'paymentItemLink' => 'Payment\View\Helper\PaymentItemLink'
+                'paymentItemLink' => 'Payment\View\Helper\PaymentItemLink',
+                'paymentDiscountFormat' => 'Payment\View\Helper\PaymentDiscountFormat'
             ],
             'factories' => [
             ]

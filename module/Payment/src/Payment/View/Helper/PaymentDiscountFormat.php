@@ -21,31 +21,21 @@
  * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
  */
 namespace Payment\View\Helper;
- 
+
 use Zend\View\Helper\AbstractHelper;
 
-class PaymentItemLink extends AbstractHelper
+class PaymentDiscountFormat extends AbstractHelper
 {
-   /**
-     * Payment item status
+    /**
+     * Discount format
      *
-     * @param array $info
-     *      string page_name
-     *      sting slug
-     *      string title
+     * @param float $discount
      * @return string
      */
-   public function __invoke($info)
-   {
-        // get page url
-        $pageUrl = $this->getView()->
-                pageUrl($info['page_name'], [], null, false, $info['slug']);
-
-        if (false !== $pageUrl) {
-            return '<a target="_blank" href="' . $this->getView()->url('page', ['page_name' =>
-                    $pageUrl, 'slug' => $info['slug']], ['force_canonical' => true]) . '">' . $info['title'] . '</a>';
-        }
-
-        return $info['title'];
-   }
+    public function __invoke($discount)
+    {
+        return $discount
+            ? $discount . '%'
+            : null;
+    }
 }

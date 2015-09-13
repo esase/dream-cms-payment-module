@@ -106,7 +106,8 @@ class PaymentWidget extends PaymentBase
             'paid',
             'cost',
             'date',
-            'currency'
+            'currency',
+            'discount'
         ];
 
         $orderType = !$orderType || $orderType == 'desc'
@@ -167,7 +168,9 @@ class PaymentWidget extends PaymentBase
             ->join(
                 ['i' => 'payment_discount_coupon'],
                 'a.discount_coupon = i.id',
-                [],
+                [
+                    'discount'
+                ],
                 'left'
             )
             ->where([

@@ -45,6 +45,10 @@
         [
             'title' => $this->translate('Date'),
             'order_name' => 'date'
+        ],
+        [
+            'title' => $this->translate('Discount'),
+            'order_name' => 'discount'
         ]
     ],
     'paginator' => $this->paginator,
@@ -56,6 +60,7 @@
         'cost' => 'paymentCostFormat',
         'date' => 'applicationDate',
         'payment' => 'translate',
+        'discount' => 'paymentDiscountFormat'
     ],
     'helpers_set_array' => [
         'cost' => true

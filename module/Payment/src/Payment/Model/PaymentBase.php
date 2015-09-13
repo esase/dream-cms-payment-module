@@ -755,6 +755,13 @@ class PaymentBase extends ApplicationAbstractBase
                 'a.transaction_id = d.id',
                 []
             )
+            ->join(
+                ['i' => 'payment_currency'],
+                'd.currency = i.id',
+                [
+                    'currency' => 'code'
+                ]
+            )
             ->where([
                 'a.transaction_id' => $transactionId
             ]);

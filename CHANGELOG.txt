@@ -1,6 +1,7 @@
-Payment 1.0.2, Sep 13, 2015
+Payment 1.0.2, Sep 14, 2015
 ====================================
 
+- fixed activation transactions in admin menu
 - fixed saving transaction history widget's filter params
 - fixed selection of currency in the admin and user part
 - fixed a strict standards notice in the shopping cart

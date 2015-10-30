@@ -1,31 +1,43 @@
 Payment = function()
 {
     /**
+     * Csrf token
+     *
+     * @var string
+     */
+    var csrfToken;
+
+    /**
      * Server url
+     *
      * @var string
      */
     var serverUrl;
 
     /**
      * Popup shopping's cart window id
+     *
      * @var string
      */
-    var popupShoppingCartId = '#popup-shopping-cart-window';
+    var popupShoppingCartId = "#popup-shopping-cart-window";
 
     /**
      * Shopping cart wrapper
+     *
      * @var string
      */
-    var shoppingCartWrapper = 'shopping-cart-wrapper';
+    var shoppingCartWrapper = "shopping-cart-wrapper";
 
     /**
      * Current object
+     *
      * @var object
      */
     var self = this;
 
     /**
      * Hide popup shopping
+     *
      * @var boolean
      */
     var hidePopupShopping = false;
@@ -41,16 +53,16 @@ Payment = function()
     var _showPopupShoppingCart = function(action, data, method)
     {
         $.ajax({
-            'type'      : typeof method != 'undefined' ? method : "post",
-            'url'       : serverUrl + '/' + action,
+            'type'      : typeof method != "undefined" ? method : "post",
+            'url'       : serverUrl + "/" + action,
             'data'      : data,
             'success'   : function(data) {
                 $(document.body).append(data);
 
                 if (!hidePopupShopping) {
-                    $(popupShoppingCartId).on('hidden.bs.modal', function (e) {
+                    $(popupShoppingCartId).on("hidden.bs.modal", function (e) {
                        $(this).remove();
-                    }).modal('show');
+                    }).modal("show");
                 }
                 else {
                     hidePopupShopping = false;
@@ -67,7 +79,7 @@ Payment = function()
      */
     var _updateShoppingCart = function(data)
     {
-        $('#' + shoppingCartWrapper).replaceWith(data);
+        $("#" + shoppingCartWrapper).replaceWith(data);
     }
 
     /**
@@ -92,17 +104,18 @@ Payment = function()
     this.addToShoppingCart = function(objectId, module, count, extraOptions)
     {
         var baseOptions = {
-            'object_id': objectId,
-            'module': module,
-            'count' : (typeof count != 'undefined' ? count : 0)
+            "csrf" : csrfToken,
+            "object_id": objectId,
+            "module": module,
+            "count" : (typeof count != "undefined" ? count : 0)
         }
 
         // merge the extra and base options
-        if (typeof extraOptions != 'undefined') {
+        if (typeof extraOptions != "undefined") {
             baseOptions = $.extend({}, baseOptions, extraOptions);
         }
 
-        _showPopupShoppingCart('ajax-add-to-shopping-cart', baseOptions);
+        _showPopupShoppingCart("ajax-add-to-shopping-cart", baseOptions);
     }
 
     /**
@@ -115,9 +128,9 @@ Payment = function()
         var $popup = $(popupShoppingCartId);
 
         // remove previously loaded popup
-        $popup.on('hidden.bs.modal', function (e) {
-            _showPopupShoppingCart('ajax-add-to-shopping-cart', $popup.find('form:first').serialize());
-        }).modal('hide');
+        $popup.on("hidden.bs.modal", function (e) {
+            _showPopupShoppingCart("ajax-add-to-shopping-cart", $popup.find("form:first").serialize());
+        }).modal("hide");
     }
 
     /**
@@ -130,7 +143,7 @@ Payment = function()
         showLoadingBox(shoppingCartWrapper);
 
         // update the shopping cart
-        $.get(serverUrl + '/ajax-update-shopping-cart?_r=' + Math.random(), function(data) {
+        $.get(serverUrl + "/ajax-update-shopping-cart?_r=" + Math.random(), function(data) {
             _updateShoppingCart(data);
         });
     }
@@ -145,7 +158,7 @@ Payment = function()
         showLoadingBox(shoppingCartWrapper);
 
         // update the shopping cart
-        $.post(serverUrl + '/ajax-change-currency', {'currency' : currency}, function(data) {
+        $.post(serverUrl + "/ajax-change-currency", {"csrf" : csrfToken, "currency" : currency}, function(data) {
             // refresh current page
             self.refreshPage();
         });
@@ -158,7 +171,7 @@ Payment = function()
      */
     this.getDiscountCouponForm = function()
     {
-        _showPopupShoppingCart('ajax-activate-discount-coupon', {}, 'get');
+        _showPopupShoppingCart("ajax-activate-discount-coupon", {}, 'get');
     }
 
     /**
@@ -171,9 +184,9 @@ Payment = function()
         var $popup = $(popupShoppingCartId);
 
         // remove previously loaded popup
-        $popup.on('hidden.bs.modal', function (e) {
-            _showPopupShoppingCart('ajax-activate-discount-coupon', $popup.find('form:first').serialize());
-        }).modal('hide');
+        $popup.on("hidden.bs.modal", function (e) {
+            _showPopupShoppingCart("ajax-activate-discount-coupon", $popup.find("form:first").serialize());
+        }).modal("hide");
     }
 
     /**
@@ -184,7 +197,7 @@ Payment = function()
      */
     this.getEditItemForm = function(itemId)
     {
-        _showPopupShoppingCart('ajax-edit-shopping-cart-item/?id=' + parseInt(itemId), {}, 'get');
+        _showPopupShoppingCart("ajax-edit-shopping-cart-item/?id=" + parseInt(itemId), {}, "get");
     }
 
     /**
@@ -198,9 +211,9 @@ Payment = function()
         var $popup = $(popupShoppingCartId);
 
         // remove previously loaded popup
-        $popup.on('hidden.bs.modal', function (e) {
-            _showPopupShoppingCart('ajax-edit-shopping-cart-item/?id=' + parseInt(itemId), $popup.find('form:first').serialize());
-        }).modal('hide');
+        $popup.on("hidden.bs.modal", function (e) {
+            _showPopupShoppingCart("ajax-edit-shopping-cart-item/?id=" + parseInt(itemId), $popup.find("form:first").serialize());
+        }).modal("hide");
     }
 
     /**
@@ -210,7 +223,7 @@ Payment = function()
      */
     this.deactivateDiscountCoupon = function()
     {
-        $.post(serverUrl + '/ajax-deactivate-discount-coupon', function(data) {
+        $.post(serverUrl + "/ajax-deactivate-discount-coupon", {"csrf" : csrfToken}, function(data) {
             // refresh current page
             self.refreshPage();
         });
@@ -237,8 +250,8 @@ Payment = function()
         showLoadingBox(shoppingCartWrapper);
 
         // update the shopping cart
-        $.post(serverUrl + '/ajax-clean-shopping-cart', function(data) {
-            typeof isShoppingCartPage != 'undefined' && true === isShoppingCartPage
+        $.post(serverUrl + "/ajax-clean-shopping-cart", {"csrf" : csrfToken}, function(data) {
+            typeof isShoppingCartPage != "undefined" && true === isShoppingCartPage
                 ? self.refreshPage()
                 : _updateShoppingCart(data);
         });
@@ -247,12 +260,26 @@ Payment = function()
     /**
      * Set server url
      *
-     * @param sting url
+     * @param string url
      * @return Payment - fluent interface
      */
     this.setServerUrl = function(url)
     {
         serverUrl = url;
+
+        return this;
+    }
+
+    /**
+     * Set csrf token
+     *
+     * @param string csrf
+     * @return Payment - fluent interface
+     */
+    this.setCsrfToken = function(csrf)
+    {
+        csrfToken = csrf;
+
         return this;
     }
 }

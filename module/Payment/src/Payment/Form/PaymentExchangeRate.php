@@ -52,6 +52,10 @@ class PaymentExchangeRate extends ApplicationAbstractCustomForm
      * @var array
      */
     protected $formElements = [
+        'csrf' => [
+            'name' => 'csrf',
+            'type' => ApplicationCustomFormBuilder::FIELD_CSRF
+        ],
         'submit' => [
             'name' => 'submit',
             'type' => ApplicationCustomFormBuilder::FIELD_SUBMIT,

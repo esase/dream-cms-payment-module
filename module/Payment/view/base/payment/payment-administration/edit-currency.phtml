@@ -43,7 +43,7 @@
         'check_acl' => true,
         'hide_action' => PaymentBaseModel::PRIMARY_CURRENCY == $this->currency['primary_currency'],
         'confirm' => $this->translate('Currency will be deleted. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'currencies' : [{$this->currency['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'currencies'], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'currencies' : [{$this->currency['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'currencies'], ['force_canonical' => true])}'}) }"
     ],
     [
         'controller' => 'payments-administration',

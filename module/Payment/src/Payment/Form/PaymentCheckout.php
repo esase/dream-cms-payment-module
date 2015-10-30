@@ -139,6 +139,10 @@ class PaymentCheckout extends ApplicationAbstractCustomForm
             'category' => 'Delivery details',
             'max_length' => self::ADDRESS_MAX_LENGTH
         ],
+        'csrf' => [
+            'name' => 'csrf',
+            'type' => ApplicationCustomFormBuilder::FIELD_CSRF
+        ],
         'submit' => [
             'name' => 'submit',
             'type' => ApplicationCustomFormBuilder::FIELD_SUBMIT,

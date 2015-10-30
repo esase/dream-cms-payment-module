@@ -22,6 +22,8 @@
  */
 namespace Payment\View\Widget;
 
+use Application\Utility\ApplicationCsrf as ApplicationCsrfUtility;
+
 class PaymentShoppingCartWidget extends PaymentAbstractWidget
 {
     /**
@@ -32,7 +34,8 @@ class PaymentShoppingCartWidget extends PaymentAbstractWidget
     public function getContent() 
     {
         // process post actions
-        if ($this->getRequest()->isPost() 
+        if ($this->getRequest()->isPost()
+                && ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))
                 && $this->getRequest()->getPost('form_name') == 'shopping-cart') {
 
             $items = $this->getRequest()->getPost('items');

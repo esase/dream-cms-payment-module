@@ -24,6 +24,7 @@ namespace Payment\View\Widget;
 
 use User\Service\UserIdentity as UserIdentityService;
 use Payment\Service\Payment as PaymentService;
+use Application\Utility\ApplicationCsrf as ApplicationCsrfUtility;
 
 class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
 {
@@ -37,7 +38,8 @@ class PaymentTransactionHistoryWidget extends PaymentAbstractWidget
         $userId = UserIdentityService::getCurrentUserIdentity()['user_id'];
 
         // process post actions
-        if ($this->getRequest()->isPost() 
+        if ($this->getRequest()->isPost()
+                && ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))
                 && $this->getRequest()->getPost('form_name') == 'transactions') {
 
             $transactions = $this->getRequest()->getPost('transactions');

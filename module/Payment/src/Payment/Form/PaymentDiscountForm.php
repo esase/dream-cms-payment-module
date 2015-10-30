@@ -48,6 +48,10 @@ class PaymentDiscountForm extends ApplicationAbstractCustomForm
      * @var array
      */
     protected $formElements = [
+        'csrf' => [
+            'name' => 'csrf',
+            'type' => ApplicationCustomFormBuilder::FIELD_CSRF
+        ],
         'coupon' => [
             'name' => 'coupon',
             'type' => ApplicationCustomFormBuilder::FIELD_TEXT,

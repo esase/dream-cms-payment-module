@@ -146,7 +146,7 @@
         'check_acl' => true,
         'hide_action' => $this->transaction['paid'] == PaymentBaseModel::TRANSACTION_PAID,
         'confirm' => $this->translate('Transaction will be activated. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'view-transaction-details', 'slug' => $this->transaction['id']], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'view-transaction-details', 'slug' => $this->transaction['id']], ['force_canonical' => true])}'}) }"
     ],
     [
         'controller' => 'payments-administration',
@@ -154,7 +154,7 @@
         'name' => $this->translate('Delete the transaction'),
         'check_acl' => true,
         'confirm' => $this->translate('Transaction will be deleted. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'list'], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'transactions' : [{$this->transaction['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'list'], ['force_canonical' => true])}'}) }"
     ],
     [
         'controller' => 'payments-administration',

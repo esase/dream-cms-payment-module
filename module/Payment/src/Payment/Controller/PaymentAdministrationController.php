@@ -82,6 +82,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
                 $this->getPage(), $this->getPerPage(), $this->getOrderBy(), $this->getOrderType());
 
         return new ViewModel([
+            'csrf_token' => $this->applicationCsrf()->getToken(),
             'transaction' => $transactionInfo,
             'paginator' => $paginator,
             'order_by' => $this->getOrderBy(),
@@ -146,6 +147,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
         }
 
         return new ViewModel([
+            'csrf_token' => $this->applicationCsrf()->getToken(),
             'transaction' => $transactionInfo
         ]);
     }
@@ -157,7 +159,9 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($transactionsIds = $request->getPost('transactions', null))) {
                 // delete selected transactions
                 $deleteResult = false;
@@ -211,7 +215,9 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($transactionsIds = $request->getPost('transactions', null))) {
                 // process transactions
                 $activationResult = true;
@@ -219,7 +225,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
 
                 foreach ($transactionsIds as $transactionId) {
                     // get the transaction info
-                    if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($transactionId, false, 'id', false))
+                    if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($transactionId, false, 'id', false, 0, false))
                                 || PaymentBaseModel::TRANSACTION_PAID == $transactionInfo['paid']) {
 
                         $activationCount++;
@@ -351,7 +357,9 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
         
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($currenciesIds = $request->getPost('currencies', null))) {
                 // delete selected currencies
                 $deleteResult = false;
@@ -454,6 +462,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
         }
 
         return new ViewModel([
+            'csrf_token' => $this->applicationCsrf()->getToken(),
             'currency' => $currency,
             'currency_form' => $currencyForm->getForm()
         ]);
@@ -504,7 +513,9 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($couponsIds = $request->getPost('coupons', null))) {
                 // delete selected coupons
                 $deleteResult = false;
@@ -653,6 +664,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
         }
 
         return new ViewModel([
+            'csrf_token' => $this->applicationCsrf()->getToken(),
             'coupon' => $coupon,
             'coupon_form' => $couponForm->getForm()
         ]);

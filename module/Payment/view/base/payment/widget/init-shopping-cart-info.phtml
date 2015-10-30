@@ -1,4 +1,5 @@
 <?php $this->inlineScript()->captureStart() ?>
     var payment = new Payment();
+    payment.setCsrfToken('<?php echo $this->escapeJs($this->csrf_token) ?>');
     payment.setServerUrl('<?php echo $this->url('application/page', ['controller' => 'payments-widget']) ?>');
 <?php $this->inlineScript()->captureEnd() ?>

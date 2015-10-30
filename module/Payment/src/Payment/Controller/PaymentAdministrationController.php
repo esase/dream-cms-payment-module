@@ -140,7 +140,7 @@ class PaymentAdministrationController extends ApplicationAbstractAdministrationC
 
         // get the transaction info
         if (null == ($transactionInfo = $this->getModel()->getTransactionInfo($this->
-                getSlug(), false, 'id', false))) {
+                getSlug(), false, 'id', false, 0, false))) {
 
             return $this->createHttpNotFoundModel($this->getResponse());
         }

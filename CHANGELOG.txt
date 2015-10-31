@@ -1,8 +1,14 @@
+Payment 1.0.3, Oct 31, 2015
+====================================
+
+- security added csrf tokens in all forms and post requests;
+- fixed viewing transaction details for different languages in admin area;
+
 Payment 1.0.2, Sep 14, 2015
 ====================================
 
-- fixed activation transactions in admin menu
-- fixed saving transaction history widget's filter params
-- fixed selection of currency in the admin and user part
-- fixed a strict standards notice in the shopping cart
+- fixed activation transactions in admin menu;
+- fixed saving transaction history widget's filter params;
+- fixed selection of currency in the admin and user part;
+- fixed a strict standards notice in the shopping cart;
 - added a license info into each file;

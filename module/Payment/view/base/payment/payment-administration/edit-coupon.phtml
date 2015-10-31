@@ -40,7 +40,7 @@
         'name' => $this->translate('Delete the coupon'),
         'check_acl' => true,
         'confirm' => $this->translate('Coupon will be deleted. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'coupons' : [{$this->coupon['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'coupons'], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'coupons' : [{$this->coupon['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'payments-administration', 'action' => 'coupons'], ['force_canonical' => true])}'}) }"
     ],
     [
         'controller' => 'payments-administration',

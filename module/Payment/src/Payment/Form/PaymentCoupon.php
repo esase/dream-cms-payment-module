@@ -98,6 +98,10 @@ class PaymentCoupon extends ApplicationAbstractCustomForm
             'label' => 'Deactivation date',
             'category' => 'Miscellaneous info'
         ],
+        'csrf' => [
+            'name' => 'csrf',
+            'type' => ApplicationCustomFormBuilder::FIELD_CSRF
+        ],
         'submit' => [
             'name' => 'submit',
             'type' => ApplicationCustomFormBuilder::FIELD_SUBMIT,

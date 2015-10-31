@@ -22,6 +22,8 @@
  */
 namespace Payment\View\Widget;
 
+use Application\Utility\ApplicationCsrf as ApplicationCsrfUtility;
+
 class PaymentInitShoppingCartInfoWidget extends PaymentAbstractWidget
 {
     /**
@@ -48,12 +50,14 @@ class PaymentInitShoppingCartInfoWidget extends PaymentAbstractWidget
      *
      * @return string|boolean
      */
-    public function getContent() 
-    {
+   public function getContent()
+   {
         if (false === ($pageUrl = $this->getView()->pageUrl('shopping-cart'))) {
             return false;
         }
 
-        return $this->getView()->partial('payment/widget/init-shopping-cart-info');
-    }
+        return $this->getView()->partial('payment/widget/init-shopping-cart-info', [
+            'csrf_token' => ApplicationCsrfUtility::getToken()
+        ]);
+   }
 }

@@ -228,7 +228,9 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null != ($discountCouponInfo = PaymentService::getDiscountCouponInfo())) {
                 PaymentService::setDiscountCouponId(null);
 
@@ -363,7 +365,13 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
      */
     public function ajaxChangeCurrencyAction()
     {
-        $this->getModel()->setShoppingCartCurrency($this->params()->fromPost('currency'));
+        $request = $this->getRequest();
+
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
+            $this->getModel()->setShoppingCartCurrency($this->params()->fromPost('currency'));
+        }
 
         return $this->getResponse();
     }
@@ -375,7 +383,9 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             $this->cleanShoppingCart();
         }
 
@@ -395,17 +405,26 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
      */
     public function ajaxAddToShoppingCartAction()
     {
+        $shoppingCartForm   = null;
+        $message            = null;
+        $updateShoppingCart = false;
+
+        $request = $this->getRequest();
+
+        if (!$request->isPost() ||
+                !$this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
+            return $this->getResponse();
+        }
+
         $objectId = $this->params()->fromPost('object_id', -1);
         $module   = $this->params()->fromPost('module');
         $count    = (int) $this->params()->fromPost('count', 0);
 
-        $shoppingCartForm  = $message = null;
-        $updateShoppingCart = false;
-
-        // get a payment module info 
+        // get a payment module info
         if (null == ($moduleInfo = $this->getModel()->getPaymentModuleInfo($module))) {
             $message = sprintf($this->
-                getTranslator()->translate('Received module not found'), $module);
+            getTranslator()->translate('Received module not found'), $module);
         }
         else {
             // get the payment handler
@@ -416,22 +435,22 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
             // get the item info
             if (null == $objectInfo = $paymentHandler->getItemInfo($objectId)) {
                 $message = $this->getTranslator()->
-                        translate('Sorry but the item not found or not activated');    
+                translate('Sorry but the item not found or not activated');
             }
             else {
                 // count is not available
                 if (PaymentBaseModel::MODULE_COUNTABLE ==
-                            $moduleInfo['countable'] && $objectInfo['count'] <= 0) {
+                    $moduleInfo['countable'] && $objectInfo['count'] <= 0) {
 
                     $message = $this->getTranslator()->translate('Item is not available');
                 }
                 else {
                     // show an additional shopping cart form
                     if ((float) $objectInfo['discount']
-                            || PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']
-                            || (PaymentBaseModel::MODULE_EXTRA_OPTIONS == $moduleInfo['extra_options'] && !empty($objectInfo['extra_options']))
-                            || (PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] &&
-                                    ($count <= 0 || $count > $objectInfo['count'])))
+                        || PaymentBaseModel::MODULE_MULTI_COSTS == $moduleInfo['multi_costs']
+                        || (PaymentBaseModel::MODULE_EXTRA_OPTIONS == $moduleInfo['extra_options'] && !empty($objectInfo['extra_options']))
+                        || (PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] &&
+                            ($count <= 0 || $count > $objectInfo['count'])))
                     {
                         // get the form instance
                         $shoppingCartForm = $this->getServiceLocator()
@@ -442,7 +461,7 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                             ->setCountLimit((PaymentBaseModel::MODULE_COUNTABLE == $moduleInfo['countable'] ? $objectInfo['count'] : 0));
 
                         if (PaymentBaseModel::MODULE_EXTRA_OPTIONS ==
-                                    $moduleInfo['extra_options'] && !empty($objectInfo['extra_options'])) {
+                            $moduleInfo['extra_options'] && !empty($objectInfo['extra_options'])) {
 
                             $shoppingCartForm->setExtraOptions($objectInfo['extra_options']);
                         }
@@ -504,8 +523,8 @@ class PaymentWidgetController extends ApplicationAbstractBaseController
                         }
                         else {
                             $message = $this->getTranslator()->translate('Error occurred');
-                        }   
-                    }                        
+                        }
+                    }
                 }
             }
         }

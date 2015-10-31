@@ -120,6 +120,10 @@ class PaymentShoppingCart extends ApplicationAbstractCustomForm
             'type' => ApplicationCustomFormBuilder::FIELD_HIDDEN,
             'required' => true
         ],
+        'csrf' => [
+            'name' => 'csrf',
+            'type' => ApplicationCustomFormBuilder::FIELD_CSRF
+        ],
         'validate' => [
             'name' => 'validate',
             'type' => ApplicationCustomFormBuilder::FIELD_HIDDEN,
